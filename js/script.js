@@ -1,30 +1,34 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   const calendarEl = document.getElementById("calendar");
+  const apiURL = "https://script.google.com/macros/s/AKfycbx.../exec"; // あなたのGAS URL
 
-  const calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: "dayGridMonth",
-    locale: "ja", // 日本語表示
-    height: "auto",
-    events: [
-      {
-        title: "EOS R6 Mark II 貸出中",
-        start: "2025-11-12",
-        end: "2025-11-15",
-        color: "#ffb3b3"
-      },
-      {
-        title: "Nikon D750 貸出中",
-        start: "2025-11-20",
-        end: "2025-11-23",
-        color: "#cce5ff"
+  try {
+    const response = await fetch(apiURL);
+    const data = await response.json();
+
+    // 🔹 FullCalendarに渡すデータを加工
+    const events = data.map(row => ({
+      title: `${row.equipment} 貸出中 ${row.lineName}`,  // 表示形式を変更！
+      start: row.start,
+      end: row.end,
+      color: "#99ccff"
+    }));
+
+    // 🔹 カレンダーを描画
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: "dayGridMonth",
+      locale: "ja",
+      height: "auto",
+      events: events,
+      headerToolbar: {
+        left: "prev,next today",
+        center: "title",
+        right: "dayGridMonth,timeGridWeek"
       }
-    ],
-    headerToolbar: {
-      left: "prev,next today",
-      center: "title",
-      right: "dayGridMonth,timeGridWeek"
-    },
-  });
+    });
 
-  calendar.render();
+    calendar.render();
+  } catch (error) {
+    console.error("データ取得エラー:", error);
+  }
 });

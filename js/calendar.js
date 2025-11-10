@@ -1,3 +1,10 @@
+/*********************************************
+ * calendar.js
+ * カメラ貸出カレンダー表示用スクリプト
+ * Google Sheets（Cloudflare Worker経由）から
+ * JSONデータを取得し、FullCalendarに反映する。
+ *********************************************/
+
 document.addEventListener("DOMContentLoaded", async function () {
   const calendarEl = document.getElementById("calendar");
 

@@ -1,61 +1,303 @@
+/* ===============================
+   共通デザイン（写真展サイト由来）
+   =============================== */
 body {
-  font-family: "Hiragino Sans", sans-serif;
-  background-color: #fafafa;
+  background-color: #f5f5f5;
+  font-family: sans-serif;
   margin: 0;
-  padding: 0;
 }
 
-header {
+/* --- ヘッダー --- */
+#main-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   background: #333;
   color: white;
-  padding: 1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  transition: top 0.3s;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-nav a {
-  color: #fff;
-  margin-right: 1rem;
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5em 1em;
+}
+
+.header-content a {
+  display: flex;
+  align-items: center;
   text-decoration: none;
-}
-
-main {
-  padding: 1rem;
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.reserve-button {
-  display: inline-block;
-  background-color: #007bff;
   color: white;
-  padding: 0.6rem 1.2rem;
-  border-radius: 4px;
+}
+
+.logo {
+  height: 40px;
+  margin-right: 1em;
+}
+
+.site-title h1 {
+  font-size: 1.2em;
+  margin: 0;
+  color: white;
+}
+
+.site-title p {
+  margin: 0;
+  font-size: 0.9em;
+  color: #ccc;
+}
+
+/* --- ナビゲーション --- */
+.navbar {
+  position: fixed;
+  top: 70px;
+  left: 0;
+  width: 100%;
+  background: #555;
+  z-index: 999;
+}
+
+.navbar ul {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  margin: 0;
+  padding: 0.5em;
+}
+
+.navbar li {
+  margin: 0 0.5em;
+}
+
+.navbar a {
+  display: block;
+  padding: 0.8em 1.2em;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+.navbar a:hover {
+  background: #777;
+}
+
+/* --- 無効化リンク --- */
+.navbar a.disabled {
+  color: #999;
+  cursor: not-allowed;
+  pointer-events: none;
+  background: transparent;
+}
+
+/* --- 本文 --- */
+main {
+  padding: 2em;
+  margin-top: 120px; /* ヘッダー＋ナビ分下げる */
+}
+
+h2 {
+  text-align: center;
+  color: #333;
+}
+
+/* --- ボタン --- */
+.button {
+  display: inline-block;
+  background: darkblue;
+  color: white;
+  padding: 0.8em 2em;
+  min-width: 200px;
+  text-align: center;
+  margin: 0.3em;
+  border-radius: 6px;
   text-decoration: none;
   font-weight: bold;
+  transition: background 0.3s;
 }
 
-.reserve-button:hover {
-  background-color: #0056b3;
+.button:hover {
+  background: navy;
 }
 
-/* Calendar Styles */
+.button.disabled {
+  background: #eee;
+  color: #999;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* --- フッター --- */
+footer {
+  background: #ccc;
+  text-align: center;
+  padding: 1.5em;
+  margin-top: 2em;
+}
+
+footer p {
+  margin: 0.3em 0;
+  font-size: 14px;
+  color: #555;
+}
+
+/* ===============================
+   カレンダー（FullCalendar）用
+   =============================== */
 #calendar {
-  max-width: 900px;
-  margin: 2rem auto;
+  max-width: 800px;
+  margin: 2em auto;
   background: white;
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  padding: 1em;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* FullCalendar ツールチップ */
+/* イベントツールチップ */
 .fc-tooltip {
   position: absolute;
   z-index: 1000;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.85);
   color: #fff;
   padding: 6px 10px;
   border-radius: 4px;
   font-size: 0.9rem;
   display: none;
   pointer-events: none;
+}
+
+/* カレンダーのヘッダー調整 */
+.fc-toolbar-title {
+  font-size: 1.3em !important;
+  color: #222;
+}
+
+/* ボタン色 */
+.fc-button-primary {
+  background-color: darkblue !important;
+  border: none !important;
+}
+
+.fc-button-primary:hover {
+  background-color: navy !important;
+}
+
+/* ================================
+   レイアウトセクション
+   ================================ */
+.c-section {
+  padding: 2em 1em;
+  background: #fafafa;
+  margin: 2em 0;
+  border-top: 2px solid #333;
+}
+
+.c-section__heading {
+  text-align: center;
+  margin-bottom: 1.5em;
+}
+
+.c-section__heading--title span {
+  font-size: 1.4em;
+  font-weight: bold;
+  color: #333;
+}
+
+.c-section__heading--subtitle {
+  font-size: 0.9em;
+  color: #777;
+  margin-top: 0.3em;
+}
+
+.c-section__container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* ================================
+   📱 スマホ・タブレット対応
+   ================================ */
+@media screen and (max-width: 768px) {
+  /* ヘッダー */
+  #main-header {
+    height: 60px;
+  }
+  .logo {
+    height: 32px;
+    margin-right: 0.6em;
+  }
+  .site-title h1 {
+    font-size: 1em;
+  }
+  .site-title p {
+    font-size: 0.8em;
+  }
+
+  /* ナビ */
+  .navbar ul {
+    flex-direction: row;
+    justify-content: space-evenly;
+    padding: 0.4em;
+  }
+  .navbar a {
+    font-size: 0.9em;
+    padding: 0.6em 0.8em;
+  }
+
+  /* 本文 */
+  main {
+    margin-top: 100px;
+    padding: 1em;
+  }
+
+  /* カレンダー */
+  #calendar {
+    width: 100%;
+    max-width: 95vw;
+    font-size: 0.8rem;
+  }
+
+  /* ボタン */
+  .button {
+    display: block;
+    width: 90%;
+    max-width: 300px;
+    margin: 0.5em auto;
+    padding: 0.9em;
+    font-size: 1em;
+    border-radius: 8px;
+  }
+
+  /* フッター */
+  footer {
+    font-size: 0.8em;
+    padding: 1em;
+  }
+}
+
+/* さらに小さい画面（480px以下） */
+@media screen and (max-width: 480px) {
+  .navbar ul {
+    flex-wrap: wrap;
+  }
+  .navbar a {
+    padding: 0.5em;
+    font-size: 0.8em;
+  }
+  .site-title h1 {
+    font-size: 0.9em;
+  }
+  .site-title p {
+    font-size: 0.75em;
+  }
+  h2 {
+    font-size: 1.1em;
+  }
 }

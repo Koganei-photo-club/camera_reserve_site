@@ -1,46 +1,63 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>カメラ貸出カレンダー</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>予約カレンダー | 貸出カメラ予約システム</title>
+  <link rel="icon" href="images/club-icon.JPG" type="image/jpeg">
+  <link rel="stylesheet" href="css/style.css">
 
-  <!-- ✅ FullCalendar の CSS（正しい1行のみ） -->
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
-
-  <!-- サイト全体の CSS -->
-  <link rel="stylesheet" href="css/style.css" />
+  <!-- FullCalendar -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales/ja.js"></script>
 </head>
-
 <body>
-  <header>
-    <h1>📅 カメラ貸出カレンダー</h1>
-    <nav>
-      <a href="index.html">ホーム</a>
-      <a href="reserve.html">予約カレンダー</a>
-    </nav>
+  <!-- ===== ヘッダー ===== -->
+  <header id="main-header">
+    <div class="header-content">
+      <a href="index.html">
+        <img src="images/club-icon.JPG" alt="写真部アイコン" class="logo">
+        <div class="site-title">
+          <h1>法政大学 小金井写真部</h1>
+          <p>貸出カメラ予約システム</p>
+        </div>
+      </a>
+    </div>
   </header>
 
-  <main>
-    <div id="calendar" style="max-width:900px; margin:2rem auto;"></div>
+  <!-- ===== ナビゲーション ===== -->
+  <nav class="navbar">
+    <ul>
+      <li><a href="index.html">ホーム</a></li>
+      <li><a href="reserve.html">予約カレンダー</a></li>
+    </ul>
+  </nav>
 
-    <div class="reserve-form">
-      <h2>🔗 予約フォーム</h2>
-      <p>カレンダーで空き状況を確認したら、以下のフォームから予約してください。</p>
-      <a href="https://docs.google.com/forms/d/e/XXXXXXXXXXXX/viewform"
-         target="_blank" class="reserve-button">Googleフォームで予約する</a>
-    </div>
+  <!-- ===== メインコンテンツ ===== -->
+  <main>
+    <h2>予約カレンダー</h2>
+    <p style="text-align:center; margin-bottom:1em;">
+      カメラの貸出状況を確認できます。<br>
+      青いバーが表示されている期間は貸出中です。<br>
+      イベントにカーソルを合わせると、LINE名が表示されます。
+    </p>
+
+    <!-- カレンダー本体 -->
+    <div id="calendar"></div>
   </main>
 
+  <!-- ===== フッター ===== -->
   <footer>
-    <p>&copy; 2025 写真部 Camera Reservation</p>
+    <p><img src="images/club-icon.JPG" alt="写真部アイコン" style="height:40px; vertical-align:middle;"></p>
+    <p>© 2025 法政大学 小金井写真部</p>
   </footer>
 
-  <!-- ✅ FullCalendar公式CDN -->
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-
-  <!-- ✅ 自作スクリプト -->
+  <!-- ===== JSファイルの読み込み ===== -->
+  <!-- サイト全体用（ヘッダー/ナビ等） -->
   <script src="js/script.js"></script>
+
+  <!-- カレンダー専用（FullCalendar & Worker連携） -->
+  <script src="js/calendar.js"></script>
 </body>
 </html>

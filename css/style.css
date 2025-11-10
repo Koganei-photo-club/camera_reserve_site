@@ -46,3 +46,16 @@ main {
   padding: 1rem;
   box-shadow: 0 0 6px rgba(0,0,0,0.1);
 }
+
+/* FullCalendar ツールチップ */
+.fc-tooltip {
+  position: absolute;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  display: none;
+  pointer-events: none;
+}

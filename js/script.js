@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", async function () {
   const calendarEl = document.getElementById("calendar");
-  const apiURL = "https://script.google.com/macros/s/AKfycbx.../exec"; // あなたのGAS URL
+  const apiURL = "https://script.google.com/a/macros/stu.hosei.ac.jp/s/AKfycbz8DPPUpn8yVTUil7jbXgCh8rwOzQFXiRhLSU40dtzUM5oHM6lui_aRF0w2wWaTPG1Fww/exec"; // あなたのGAS URL
 
   try {
     const response = await fetch(apiURL);

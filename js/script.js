@@ -1,30 +1,30 @@
 document.addEventListener("DOMContentLoaded", async function () {
   const calendarEl = document.getElementById("calendar");
-  const apiURL = "https://script.google.com/a/macros/stu.hosei.ac.jp/s/AKfycbz8DPPUpn8yVTUil7jbXgCh8rwOzQFXiRhLSU40dtzUM5oHM6lui_aRF0w2wWaTPG1Fww/exec"; // あなたのGAS URL
+
+  // Cloudflare Worker の URL
+  const apiUrl = "https://camera-proxy.koganei-photo-club-hosei-1c2.workers.dev";
 
   try {
-    const response = await fetch(apiURL);
-    const data = await response.json();
+    const res = await fetch(apiUrl);
+    const data = await res.json();
 
-    // 🔹 FullCalendarに渡すデータを加工
-    const events = data.map(row => ({
-      title: `${row.equipment} 貸出中 ${row.lineName}`,  // 表示形式を変更！
-      start: row.start,
-      end: row.end,
-      color: "#99ccff"
-    }));
+    // スプレッドシートの列名に合わせてマッピング
+    const events = data.map(row => {
+      return {
+        title: `${row["借りたい機材を選択してください。"]} 貸出中（${row["LINEの名前を記入してください。"]}）`,
+        start: row["借り始め予定日を選択してください。"],
+        end: row["返却予定日を選択してください\r"],
+        color: "#007bff"
+      };
+    });
 
-    // 🔹 カレンダーを描画
     const calendar = new FullCalendar.Calendar(calendarEl, {
       initialView: "dayGridMonth",
       locale: "ja",
       height: "auto",
       events: events,
-      headerToolbar: {
-        left: "prev,next today",
-        center: "title",
-        right: "dayGridMonth,timeGridWeek"
-      }
+      eventTimeFormat: { hour: "2-digit", minute: "2-digit" },
+      displayEventEnd: true
     });
 
     calendar.render();

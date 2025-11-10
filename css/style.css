@@ -36,3 +36,13 @@ main {
 .reserve-button:hover {
   background-color: #0056b3;
 }
+
+/* Calendar Styles */
+#calendar {
+  max-width: 900px;
+  margin: 2rem auto;
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+}

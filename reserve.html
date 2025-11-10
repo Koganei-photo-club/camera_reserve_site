@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>カメラ貸出カレンダー</title>
+
+  <!-- FullCalendar CSS（CDN版） -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <h1>📅 カメラ貸出カレンダー</h1>
+    <nav>
+      <a href="index.html">ホーム</a>
+      <a href="reserve.html">予約カレンダー</a>
+    </nav>
+  </header>
+
+  <main>
+    <div id="calendar"></div>
+
+    <div class="reserve-form">
+      <h2>🔗 予約フォーム</h2>
+      <p>カレンダーで空き状況を確認したら、以下のフォームから予約してください。</p>
+      <a href="https://docs.google.com/forms/d/e/XXXXXXXXXXXX/viewform"
+         target="_blank" class="reserve-button">Googleフォームで予約する</a>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 写真部 Camera Reservation</p>
+  </footer>
+
+  <!-- FullCalendar JS -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>

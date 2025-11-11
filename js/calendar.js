@@ -82,6 +82,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         equipment: equipment,
         authCode: code
       };
+      
+      console.log("キャンセル送信データ:", payload);
 
       try {
         const res = await fetch(apiUrl, {

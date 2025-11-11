@@ -69,10 +69,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     confirmBtn.addEventListener("click", async () => {
       const name = document.getElementById("cancelName").value.trim();
       const code = document.getElementById("cancelCode").value.trim();
-      const equipment = modal.dataset.equipment;
+      const equipment = modal.dataset.equipment || "";
 
-      if (!name || !code) {
-        messageEl.textContent = "⚠️ 氏名と認証コードを入力してください。";
+      if (!name || !equipment || !code) {
+        messageEl.textContent = "⚠️ 氏名・認証コード・機材情報が不足しています。";
         return;
       }
 

@@ -8,7 +8,7 @@
 document.addEventListener("DOMContentLoaded", async function () {
   const calendarEl = document.getElementById("calendar");
 
-  const apiUrl = "https://camera-proxy.koganei-photo-club-hosei-1c2.workers.dev";
+  const apiUrl = "https://camera-proxy.photo-club-at-koganei.workers.dev/";
 
   try {
     const res = await fetch(apiUrl);

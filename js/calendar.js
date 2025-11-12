@@ -12,26 +12,32 @@ document.addEventListener("DOMContentLoaded", async function () {
     const res = await fetch(apiUrl);
     const data = await res.json();
 
-    // === スプレッドシートのデータをイベント形式に変換 ===
-    const events = data.map(row => {
-      const endRaw = row["返却予定日"];
-      const startRaw = row["借り始め予定日"];
-      const equipment = row["借りたい機材"];
+// === スプレッドシートのデータをイベント形式に変換 ===
+const events = data.map(row => {
+  const startRaw = row["借り始め予定日"];
+  const endRaw = row["返却予定日"];
+  const equipment = row["借りたい機材"];
 
-    // ✅ 日付文字列をスラッシュにも対応して安全にパース
-      const startDate = new Date(startRaw.replace(/\//g, "-"));
-      const endDate = new Date(endRaw.replace(/\//g, "-"));
+  // ✅ スラッシュ区切りでもハイフンに変換して安全にパース
+  const startDate = new Date(String(startRaw).replace(/\//g, "-"));
+  const endDate = new Date(String(endRaw).replace(/\//g, "-"));
 
-    // ✅ 返却日を含めるために +1日補正
-      endDate.setDate(endDate.getDate() + 1);
+  // ✅ 日付が不正な場合はスキップ（Invalid Date対策）
+  if (isNaN(startDate) || isNaN(endDate)) {
+    console.warn("⚠️ 無効な日付をスキップ:", row);
+    return null;
+  }
 
-      return {
-        title: `${equipment} 貸出中`,
-        start: startDate.toISOString().split("T")[0],
-        end: endDate.toISOString().split("T")[0],
-        color: "#007bff"
-      };
-    });
+  // ✅ 返却日を含めるため +1日補正
+  endDate.setDate(endDate.getDate() + 1);
+
+  return {
+    title: `${equipment} 貸出中`,
+    start: startDate.toISOString().split("T")[0],
+    end: endDate.toISOString().split("T")[0],
+    color: "#007bff"
+  };
+}).filter(e => e !== null); // ← 無効データを除外
 
     // === FullCalendar 設定 ===
     const calendar = new FullCalendar.Calendar(calendarEl, {

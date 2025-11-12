@@ -117,3 +117,18 @@ const events = data.map(row => {
     console.error("データ取得エラー:", error);
   }
 });
+
+const calendar = new FullCalendar.Calendar(calendarEl, {
+  initialView: "dayGridMonth",
+  locale: "ja",
+  height: "auto",
+  events: events,
+  eventTimeFormat: { hour: "2-digit", minute: "2-digit" },
+  displayEventEnd: true,
+  dayMaxEventRows: 3, // ← 同日最大3件まで表示（それ以上は「+X件」）
+  views: {
+    dayGridMonth: {
+      dayMaxEventRows: 3 // ← 月間ビューで3件に制限
+    }
+  },
+});

@@ -59,7 +59,7 @@ const events = data.map(row => {
         modal.style.display = "flex";
 
         // 設備名をモーダルに保持
-        modal.dataset.equipment = info.event.title.replace(" 貸出中", "");
+        modal.dataset.equipment = info.event.title.replace(" 貸出中", "").trim();
       }
     });
 

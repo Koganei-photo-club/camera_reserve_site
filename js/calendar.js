@@ -18,6 +18,8 @@ const events = data.map(row => {
   const endRaw = row["返却予定日"];
   const equipment = row["借りたい機材"];
 
+  if (!startRaw || !endRaw) return null; // ← 日付が無い場合はスキップ
+
   // ✅ スラッシュ区切りでもハイフンに変換して安全にパース
   const startDate = new Date(String(startRaw).replace(/\//g, "-"));
   const endDate = new Date(String(endRaw).replace(/\//g, "-"));
@@ -29,6 +31,8 @@ const events = data.map(row => {
   }
 
   // ✅ 返却日を含めるため +1日補正
+  startDate.setHours(startDate.getHours() + 9); // ← JST調整
+  endDate.setHours(endDate.getHours() + 9); // ← JST調整
   endDate.setDate(endDate.getDate() + 1);
 
   return {

@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     { id: "slot1", label: "1限 10:50〜12:30" },
     { id: "slot2", label: "2限 13:20〜15:00" },
     { id: "slot3", label: "3限 15:10〜16:50" },
+    { id: "slot4", label: "4限 17:00〜18:40" },
   ];
 
   // ========== 1. 予約データ取得 ==========

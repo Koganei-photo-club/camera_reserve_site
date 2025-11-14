@@ -2,11 +2,12 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>ホーム | 法政大学 小金井写真部 貸出カメラ予約システム</title>
+  <title>総合トップ | 法政大学 小金井写真部 予約システム</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="icon" href="images/club-icon.JPG" type="image/jpeg">
-  <link rel="stylesheet" href="css/style.css">
+  <!-- camera/ の CSS をそのまま利用（デザイン統一のため） -->
+  <link rel="icon" href="camera/images/club-icon.JPG" type="image/jpeg">
+  <link rel="stylesheet" href="camera/css/style.css">
 </head>
 
 <body>
@@ -15,94 +16,46 @@
   <header id="main-header">
     <div class="header-content">
       <a href="index.html">
-        <img src="images/club-icon.JPG" alt="写真部アイコン" class="logo">
+        <img src="camera/images/club-icon.JPG" alt="写真部アイコン" class="logo">
         <div class="site-title">
           <h1>法政大学 小金井写真部</h1>
-          <p>貸出カメラ予約システム</p>
+          <p>予約システム 総合トップ</p>
         </div>
       </a>
     </div>
   </header>
 
-  <!-- ===== ナビ ===== -->
+  <!-- ===== ナビゲーション ===== -->
   <nav class="navbar">
     <ul>
-      <li><a href="index.html">ホーム</a></li>
-      <li><a href="reserve.html">予約カレンダー</a></li>
+      <li><a href="camera/index.html">カメラ予約</a></li>
+      <li><a href="pc/index.html">PC予約</a></li>
     </ul>
   </nav>
 
-  <!-- ===== 本文 ===== -->
+  <!-- ===== 本文エリア ===== -->
   <main>
     <section style="text-align:center; margin-top:2em;">
-      <h2>貸出カメラ予約システムへようこそ</h2>
+      <h2>予約システム（総合案内）</h2>
       <p style="max-width:600px; margin:1em auto; line-height:1.8;">
-        このシステムでは、小金井写真部の共用カメラの貸出状況を確認し、<br>
-        貸出申請フォームから予約を行うことができます。<br>
-        申請後、カレンダーに自動的に反映されます。
+        法政大学 小金井写真部の貸出管理システムです。<br>
+        下記のボタンから、予約カテゴリを選択してください。
       </p>
+
       <div class="link-buttons">
-        <a href="reserve.html" class="button">予約カレンダーを見る</a>
-        <a href="https://forms.gle/kShTBhvz6r7FsAcS6" class="button" target="_blank">貸出申請フォームへ</a>
+        <a href="camera/index.html" class="button" style="font-size:1.2em;">📷 カメラ予約へ</a>
+        <a href="pc/index.html" class="button" style="font-size:1.2em;">💻 PC予約へ</a>
       </div>
     </section>
 
-    <!-- 以下、あなたの元のコードをそのまま入れる -->
-    <!-- ===== お知らせセクション ===== -->
     <section class="c-section">
       <div class="c-section__heading">
         <div class="c-section__heading--title"><span>お知らせ</span></div>
         <div class="c-section__heading--subtitle">Information</div>
       </div>
       <div class="c-section__container">
-        <p>現在、2025年度秋学期の貸出予約を受け付けています。</p>
-        <p>予約は原則として、<strong>最大7日間</strong>まで可能です。</p>
-      </div>
-    </section>
-
-    <!-- ===== カメラ一覧セクション ===== -->
-    <section class="c-section">
-      <div class="c-section__heading">
-        <div class="c-section__heading--title"><span>貸出可能カメラ一覧</span></div>
-        <div class="c-section__heading--subtitle">Available Cameras</div>
-      </div>
-
-      <div class="work-gallery">
-        <!-- Canon EOS 5D Mark III -->
-        <div class="work-card">
-          <img src="images/camera_5d.jpg" alt="Canon EOS 5D Mark III">
-          <div class="work-info">
-            <div class="work-title">Canon EOS 5D Mark III</div>
-            <p class="work-description">
-              フルサイズセンサー搭載の高性能一眼レフ。<br>
-              風景・ポートレート撮影に最適。
-            </p>
-          </div>
-        </div>
-
-        <!-- Canon EOS R10 -->
-        <div class="work-card">
-          <img src="images/camera_r10.jpg" alt="Canon EOS R10">
-          <div class="work-info">
-            <div class="work-title">Canon EOS R10</div>
-            <p class="work-description">
-              APS-C ミラーレス。軽量で操作性抜群。<br>
-              初心者から中級者まで幅広く対応。
-            </p>
-          </div>
-        </div>
-
-        <!-- Nikon D3000 -->
-        <div class="work-card">
-          <img src="images/camera_d3000.jpg" alt="Nikon D3000">
-          <div class="work-info">
-            <div class="work-title">Nikon D3000</div>
-            <p class="work-description">
-              入門用デジタル一眼レフ。<br>
-              使いやすく、基礎練習に最適。
-            </p>
-          </div>
-        </div>
+        <p>各機材の貸出状況の確認および予約申請が可能です。</p>
+        <p>カテゴリごとに管理されているため、必要な項目をお選びください。</p>
       </div>
     </section>
 
@@ -110,11 +63,9 @@
 
   <!-- ===== フッター ===== -->
   <footer>
-    <p><img src="images/club-icon.JPG" style="height:40px;"></p>
+    <p><img src="camera/images/club-icon.JPG" style="height:40px;"></p>
     <p>© 2025 法政大学 小金井写真部</p>
   </footer>
 
-  <!-- JS -->
-  <script src="js/script.js"></script>
 </body>
 </html>

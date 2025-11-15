@@ -15,12 +15,15 @@ document.addEventListener("DOMContentLoaded", async function () {
   ];
 
   function isPcSlotAvailable(dateStr) {
+      // 今日を JST の yyyy-mm-dd に正規化
     const today = new Date();
-    today.setHours(0,0,0,0);
+    const todayStr = today.toISOString().slice(0, 10);  // UTC日付になるが後で補正
+    const todayJst = new Date(todayStr + "T00:00:00+09:00"); 
 
-    const target = new Date(dateStr);
+     // ターゲット日付を JST の00:00で固定
+    const target = new Date(dateStr + "T00:00:00+09:00");
 
-    return target > today;  // 今日より未来だけ予約可能
+    return target > todayJst;
   }
 
   let rawData = [];

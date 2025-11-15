@@ -1,5 +1,5 @@
 /**********************************************
- * PC予約カレンダー 完全版
+ * PC予約カレンダー 完全版（2025-11 修正版）
  **********************************************/
 
 document.addEventListener("DOMContentLoaded", async function () {
@@ -49,67 +49,83 @@ document.addEventListener("DOMContentLoaded", async function () {
     locale: "ja",
     height: "auto",
 
+    /***********************
+     * 各日付セルのマーク描画
+     ***********************/
     dayCellDidMount(info) {
-  const cellDate = info.date;
-  const year = cellDate.getFullYear();
-  const month = cellDate.getMonth();
+      const cellDate = info.date;
 
-  const calendarMonth = info.view.currentStart.getMonth();
+      // === FullCalendar の正しい「表示中の月」 ===
+      const displayDate = new Date(info.view.currentStart);
+      displayDate.setDate(displayDate.getDate() + 7);  // ← 1週間足すことで正しい月へ修正
+      const displayMonth = displayDate.getMonth();
 
-  // === 今月以外はスキップ ===
-  if (month !== calendarMonth) {
-    const old = info.el.querySelector(".pc-mark");
-    if (old) old.remove();
-    info.el.style.background = "";
-    return;
-  }
+      // === このセルの日付 ===
+      const month = cellDate.getMonth();
 
-  const dateStr = cellDate.toISOString().split("T")[0];
-  const cnt = countByDate[dateStr] || 0;
+      // === 今月以外は塗りつぶしもマーク表示も全部消す ===
+      if (month !== displayMonth) {
+        const old = info.el.querySelector(".pc-mark");
+        if (old) old.remove();
+        info.el.style.background = "";
+        return;
+      }
 
-  let mark = "◯";
-  let color = "#c8f7c5";
+      // === 今月の予約数を取得 ===
+      const dateStr = cellDate.toISOString().split("T")[0];
+      const cnt = countByDate[dateStr] || 0;
 
-  if (cnt >= 4 && cnt <= 7) {
-    mark = "△";
-    color = "#ffe8b3";
-  } else if (cnt >= 8) {
-    mark = "×";
-    color = "#ffd6d6";
-  }
+      // === マーク判定 ===
+      let mark = "◯";
+      let color = "#c8f7c5";
 
-  info.el.style.position = "relative";  // ← 必須！
+      if (cnt >= 4 && cnt <= 7) {
+        mark = "△";
+        color = "#ffe8b3";
+      } else if (cnt >= 8) {
+        mark = "×";
+        color = "#ffd6d6";
+      }
 
-  info.el.style.background = color;
+      // === 背景色セット ===
+      info.el.style.position = "relative";
+      info.el.style.background = color;
 
-  // 既存マーク削除
-  const oldMark = info.el.querySelector(".pc-mark");
-  if (oldMark) oldMark.remove();
+      // === 古いマーク削除 ===
+      const oldMark = info.el.querySelector(".pc-mark");
+      if (oldMark) oldMark.remove();
 
-  // --- 右下に固定表示するマーク ---
-  const markDiv = document.createElement("div");
-  markDiv.className = "pc-mark";
-  markDiv.textContent = mark;
+      // === 新しいマーク（右下固定） ===
+      const markDiv = document.createElement("div");
+      markDiv.className = "pc-mark";
+      markDiv.textContent = mark;
 
-  Object.assign(markDiv.style, {
-    position: "absolute",
-    bottom: "4px",
-    right: "4px",
-    fontSize: "1.4em",
-    fontWeight: "bold",
-    pointerEvents: "none"
-  });
+      Object.assign(markDiv.style, {
+        position: "absolute",
+        bottom: "4px",
+        right: "4px",
+        fontSize: "1.4em",
+        fontWeight: "bold",
+        pointerEvents: "none"
+      });
 
-  info.el.appendChild(markDiv);
-},
+      info.el.appendChild(markDiv);
+    },
+
+    /***********************
+     * 日付クリック → モーダル表示
+     ***********************/
+    dateClick(info) {
+      openDayModal(info.dateStr);
+    }
   });
 
   calendar.render();
 
 
-  /***********************
+  /**********************************************
    * 日別モーダル表示
-   ***********************/
+   **********************************************/
   const dayModal = document.getElementById("dayModal");
   const dayTitle = document.getElementById("dayTitle");
   const timeSlotsEl = document.getElementById("timeSlots");
@@ -149,9 +165,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
 
-  /***********************
-   * 空き枠 → Googleフォーム
-   ***********************/
+  /**********************************************
+   * 空き枠 → Googleフォームへ誘導
+   **********************************************/
   function openReserveConfirm(date, slot) {
     const ok = confirm(`${date} / ${slot}\nこの枠を予約しますか？`);
     if (!ok) return;
@@ -165,9 +181,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
 
-  /***********************
-   * キャンセル申請
-   ***********************/
+  /**********************************************
+   * キャンセル申請モーダル
+   **********************************************/
   const cancelModal = document.getElementById("cancelModal");
   const cancelTarget = document.getElementById("cancelTarget");
   const cancelClose = document.getElementById("cancelClose");
@@ -187,7 +203,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     cancelMessage.textContent = "";
     cancelModal.style.display = "flex";
   }
-
 
   cancelConfirm.addEventListener("click", async () => {
     const name = document.getElementById("cancelName").value.trim();

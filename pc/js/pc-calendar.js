@@ -1,5 +1,5 @@
 /**********************************************
- * PC予約カレンダー 完全版（2025-11 修正版）
+ * PC予約カレンダー 完全安定版（2025-11）
  **********************************************/
 
 document.addEventListener("DOMContentLoaded", async function () {
@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   const calendarEl = document.getElementById("calendar");
   const apiUrl = "https://pc-proxy.photo-club-at-koganei.workers.dev/";
 
-  // PC予約枠（8枠）
   const TIME_SLOTS = [
     "10:50〜11:40", "11:40〜12:30",
     "13:20〜14:10", "14:10〜15:00",
@@ -17,9 +16,10 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   let rawData = [];
 
-  /***********************
+
+  /************************************************
    * 予約データ取得
-   ***********************/
+   ************************************************/
   try {
     const res = await fetch(apiUrl);
     rawData = await res.json();
@@ -29,97 +29,35 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
 
-  /***********************
-   * 日付ごとの予約数を集計
-   ***********************/
+  /************************************************
+   * 日付別の予約カウント
+   ************************************************/
   const countByDate = {};
   rawData.forEach(r => {
-    const d = r.date;
-    if (!d) return;
-    if (!countByDate[d]) countByDate[d] = 0;
-    countByDate[d]++;
+    if (!r.date) return;
+    if (!countByDate[r.date]) countByDate[r.date] = 0;
+    countByDate[r.date]++;
   });
 
 
-  /***********************
-   * 月間カレンダー構築
-   ***********************/
+  /************************************************
+   * カレンダー本体
+   ************************************************/
   const calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: "dayGridMonth",
     locale: "ja",
     height: "auto",
 
-    /***********************
-     * 各日付セルのマーク描画
-     ***********************/
+    // ========= 日セル描画（初回 & 月移動後に再実行される） =========
     dayCellDidMount(info) {
-      const cellDate = info.date;
-
-      // --- 表示中の月を正確に算出 ---
-      const start = new Date(info.view.currentStart);
-      const end = new Date(info.view.currentEnd);
-
-      const middle = new Date((start.getTime() + end.getTime()) / 2);
-      const displayMonth = middle.getMonth();
-      const displayYear = middle.getFullYear();
-
-      // === このセルの日付 ===
-      const cellMonth = cellDate.getMonth();
-      const cellYear = cellDate.getFullYear();
-
-      // === 今月以外（前月・次月）は塗りつぶししない ===
-      const isCurrentMonth = (cellYear === displayYear && cellMonth === displayMonth);
-      if (!isCurrentMonth) {
-        const old = info.el.querySelector(".pc-mark");
-        if (old) old.remove();
-        info.el.style.background = "";
-        return;
-      }
-
-      // --- ここから下は「今月の日付」にだけ適用される ---
-      const dateStr = cellDate.toISOString().split("T")[0];
-      const cnt = countByDate[dateStr] || 0;
-
-      // === マーク判定 ===
-      let mark = "◯";
-      let color = "#c8f7c5";
-
-      if (cnt >= 4 && cnt <= 7) {
-        mark = "△";
-        color = "#ffe8b3";
-      } else if (cnt >= 8) {
-        mark = "×";
-        color = "#ffd6d6";
-      }
-
-      // === 背景色セット ===
-      info.el.style.position = "relative";
-      info.el.style.background = color;
-
-      // === 古いマーク削除 ===
-      const oldMark = info.el.querySelector(".pc-mark");
-      if (oldMark) oldMark.remove();
-
-      // === 新しいマーク（右下固定） ===
-      const markDiv = document.createElement("div");
-      markDiv.className = "pc-mark";
-      markDiv.textContent = mark;
-
-      Object.assign(markDiv.style, {
-        position: "absolute",
-        bottom: "4px",
-        right: "4px",
-        fontSize: "1.4em",
-        fontWeight: "bold",
-        pointerEvents: "none"
-      });
-
-      info.el.appendChild(markDiv);
+      paintCell(info, calendar);
     },
 
-    /***********************
-     * 日付クリック → モーダル表示
-     ***********************/
+    // ========= 表示月が確定した直後に発火（Safari対策・最重要） =========
+    datesSet(info) {
+      fixMonthPaint(calendar, countByDate);
+    },
+
     dateClick(info) {
       openDayModal(info.dateStr);
     }
@@ -128,9 +66,128 @@ document.addEventListener("DOMContentLoaded", async function () {
   calendar.render();
 
 
-  /**********************************************
-   * 日別モーダル表示
-   **********************************************/
+  /************************************************
+   * 日セルの色付け（関数化）
+   ************************************************/
+  function paintCell(info, calendarInstance) {
+
+    const cellDate = info.date;
+    const dispMonth = info.view.currentStart.getMonth();
+    const dispYear  = info.view.currentStart.getFullYear();
+
+    // 他の月のセルは背景クリア
+    if (cellDate.getMonth() !== dispMonth || cellDate.getFullYear() !== dispYear) {
+      const old = info.el.querySelector(".pc-mark");
+      if (old) old.remove();
+      info.el.style.background = "";
+      return;
+    }
+
+    const dateStr = cellDate.toISOString().split("T")[0];
+    const cnt = countByDate[dateStr] || 0;
+
+    let mark = "◯";
+    let color = "#c8f7c5";
+    if (cnt >= 4 && cnt <= 7) {
+      mark = "△";
+      color = "#ffe8b3";
+    } else if (cnt >= 8) {
+      mark = "×";
+      color = "#ffd6d6";
+    }
+
+    info.el.style.position = "relative";
+    info.el.style.background = color;
+
+    const oldMark = info.el.querySelector(".pc-mark");
+    if (oldMark) oldMark.remove();
+
+    const div = document.createElement("div");
+    div.className = "pc-mark";
+    div.textContent = mark;
+
+    Object.assign(div.style, {
+      position: "absolute",
+      bottom: "4px",
+      right: "4px",
+      fontSize: "1.4em",
+      fontWeight: "bold",
+      pointerEvents: "none"
+    });
+
+    info.el.appendChild(div);
+  }
+
+
+  /************************************************
+   * 月が確定した後に全日セルを再塗り（最重要）
+   ************************************************/
+  function fixMonthPaint(calendarInstance, countMap) {
+
+    const view = calendarInstance.view;
+    const start = new Date(view.currentStart);
+    const end   = new Date(view.currentEnd);
+
+    const mid = new Date((start.getTime() + end.getTime()) / 2);
+
+    const dispMonth = mid.getMonth();
+    const dispYear  = mid.getFullYear();
+
+    document.querySelectorAll(".fc-daygrid-day").forEach(cell => {
+
+      const dateStr = cell.getAttribute("data-date");
+      if (!dateStr) return;
+
+      const d = new Date(dateStr);
+
+      // 他の月のセルは背景クリア
+      if (d.getMonth() !== dispMonth || d.getFullYear() !== dispYear) {
+        cell.style.background = "";
+        const old = cell.querySelector(".pc-mark");
+        if (old) old.remove();
+        return;
+      }
+
+      // 今月のセルだけ色付け
+      const cnt = countMap[dateStr] || 0;
+
+      let mark = "◯";
+      let color = "#c8f7c5";
+      if (cnt >= 4 && cnt <= 7) {
+        mark = "△";
+        color = "#ffe8b3";
+      } else if (cnt >= 8) {
+        mark = "×";
+        color = "#ffd6d6";
+      }
+
+      cell.style.background = color;
+      cell.style.position = "relative";
+
+      const old = cell.querySelector(".pc-mark");
+      if (old) old.remove();
+
+      const div = document.createElement("div");
+      div.className = "pc-mark";
+      div.textContent = mark;
+
+      Object.assign(div.style, {
+        position: "absolute",
+        bottom: "4px",
+        right: "4px",
+        fontSize: "1.4em",
+        fontWeight: "bold",
+        pointerEvents: "none"
+      });
+
+      cell.appendChild(div);
+    });
+  }
+
+
+  /************************************************
+   * 日別モーダル
+   ************************************************/
   const dayModal = document.getElementById("dayModal");
   const dayTitle = document.getElementById("dayTitle");
   const timeSlotsEl = document.getElementById("timeSlots");
@@ -144,7 +201,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     dayTitle.textContent = `${date} の予約状況`;
 
     const todaysData = rawData.filter(r => r.date === date);
-
     timeSlotsEl.innerHTML = "";
 
     TIME_SLOTS.forEach(slot => {
@@ -156,7 +212,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         btn.className = "slot booked";
         btn.textContent = `${slot}（予約済）`;
         btn.addEventListener("click", () => openCancelModal(date, slot));
-
       } else {
         btn.className = "slot free";
         btn.textContent = `${slot}（空き）`;
@@ -170,9 +225,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
 
-  /**********************************************
-   * 空き枠 → Googleフォームへ誘導
-   **********************************************/
+  /************************************************
+   * Googleフォームへ飛ぶ
+   ************************************************/
   function openReserveConfirm(date, slot) {
     const ok = confirm(`${date} / ${slot}\nこの枠を予約しますか？`);
     if (!ok) return;
@@ -186,9 +241,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
 
-  /**********************************************
-   * キャンセル申請モーダル
-   **********************************************/
+  /************************************************
+   * キャンセル申請
+   ************************************************/
   const cancelModal = document.getElementById("cancelModal");
   const cancelTarget = document.getElementById("cancelTarget");
   const cancelClose = document.getElementById("cancelClose");
@@ -203,11 +258,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   function openCancelModal(date, slot) {
     cancelDate = date;
     cancelSlot = slot;
-
     cancelTarget.textContent = `${date} / ${slot}`;
     cancelMessage.textContent = "";
     cancelModal.style.display = "flex";
   }
+
 
   cancelConfirm.addEventListener("click", async () => {
     const name = document.getElementById("cancelName").value.trim();
@@ -232,8 +287,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-
       const result = await res.json();
+
       cancelMessage.textContent = result.message;
 
       if (result.status === "success") {

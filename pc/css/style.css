@@ -618,3 +618,10 @@ footer p {
   margin-top: 1em;
   padding: 0.7em 1.2em;
 }
+
+.slot.closed {
+  background: #ddd;
+  color: #888;
+  cursor: not-allowed;
+  border: 1px solid #ccc;
+}

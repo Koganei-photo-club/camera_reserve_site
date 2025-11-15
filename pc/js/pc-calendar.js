@@ -205,9 +205,18 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     TIME_SLOTS.forEach(slot => {
       const reserved = todaysData.some(r => r.slot === slot);
+      const available = isPcSlotAvailable(date);
 
       const btn = document.createElement("button");
 
+      if (!available) {
+        // 予約締切済み
+        btn.className = "slot closed";
+        btn.textContent = `${slot}（予約締切）`;
+        btn.disabled = true;
+        timeSlotsEl.appendChild(btn);
+        return;
+        }
       if (reserved) {
         btn.className = "slot booked";
         btn.textContent = `${slot}（予約済）`;
@@ -238,6 +247,15 @@ document.addEventListener("DOMContentLoaded", async function () {
       + `&entry.780927556=${encodeURIComponent(slot)}`;
 
     window.open(url, "_blank");
+  }
+
+  // PC予約の締切判定
+  function isPcSlotAvailable(dateStr) {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const target = new Date(dateStr);
+      return target > today; // 今日より未来の日だけ可
   }
 
 

@@ -518,3 +518,55 @@ footer p {
   color: #666;
   cursor: not-allowed;
 }
+
+/* ===== PC予約：日別Lightbox ===== */
+.day-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9998;
+}
+
+.day-box {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 320px;
+  text-align: center;
+}
+
+.slot {
+  display: block;
+  width: 100%;
+  padding: 0.8em;
+  margin: 0.5em 0;
+  border-radius: 6px;
+  border: none;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+.free {
+  background: #d8f8d8;
+  color: #000;
+}
+
+.booked {
+  background: #eee;
+  color: #777;
+  cursor: pointer;
+}
+
+.close-btn {
+  margin-top: 1em;
+  padding: 0.7em 1.5em;
+  border: none;
+  background: #777;
+  color: #fff;
+  border-radius: 6px;
+}
+
+/* PC予約キャンセルモーダルは既存のものを使用 */

@@ -50,51 +50,58 @@ document.addEventListener("DOMContentLoaded", async function () {
     height: "auto",
 
     dayCellDidMount(info) {
-      const cellDate = info.date;
-      const year = cellDate.getFullYear();
-      const month = cellDate.getMonth(); // 0=Jan, 1=Feb...
+  const cellDate = info.date;
+  const year = cellDate.getFullYear();
+  const month = cellDate.getMonth();
 
-      const calendarMonth = info.view.currentStart.getMonth(); // 今月の月番号
+  const calendarMonth = info.view.currentStart.getMonth();
 
-      // === 前月・翌月のセルなら何もしない ===
-      if (month !== calendarMonth) {
-        // 背景もデフォルトに戻す（FullCalendar が持っている色を使用）
-        info.el.style.background = "";
+  // === 今月以外はスキップ ===
+  if (month !== calendarMonth) {
+    const old = info.el.querySelector(".pc-mark");
+    if (old) old.remove();
+    info.el.style.background = "";
+    return;
+  }
 
-        // 古いマークが残っていたら除去
-        const oldMark = info.el.querySelector(".pc-mark");
-    if (oldMark) oldMark.remove();
+  const dateStr = cellDate.toISOString().split("T")[0];
+  const cnt = countByDate[dateStr] || 0;
 
-        return; // ★処理終了
-      }
-    // === ここから通常月の処理 ===
-      const dateStr = cellDate.toISOString().split("T")[0];
-      const cnt = countByDate[dateStr] || 0;
+  let mark = "◯";
+  let color = "#c8f7c5";
 
-      let mark = "◯";
-      let color = "#c8f7c5";
-
-      if (cnt >= 4 && cnt <= 7) {
-        mark = "△";
-        color = "#ffe8b3";
-      } else if (cnt >= 8) {
+  if (cnt >= 4 && cnt <= 7) {
+    mark = "△";
+    color = "#ffe8b3";
+  } else if (cnt >= 8) {
     mark = "×";
     color = "#ffd6d6";
-      }
+  }
 
-      info.el.style.background = color;
-      // 一度クリア
-      const old = info.el.querySelector(".pc-mark");
-      if (old) old.remove();
+  info.el.style.position = "relative";  // ← 必須！
 
-      const markDiv = document.createElement("div");
-      markDiv.className = "pc-mark";
-      markDiv.textContent = mark;
-      markDiv.style.textAlign = "center";
-      markDiv.style.fontSize = "1.4em";
-      markDiv.style.marginTop = "4px";
-      info.el.appendChild(markDiv);
-    },
+  info.el.style.background = color;
+
+  // 既存マーク削除
+  const oldMark = info.el.querySelector(".pc-mark");
+  if (oldMark) oldMark.remove();
+
+  // --- 右下に固定表示するマーク ---
+  const markDiv = document.createElement("div");
+  markDiv.className = "pc-mark";
+  markDiv.textContent = mark;
+
+  Object.assign(markDiv.style, {
+    position: "absolute",
+    bottom: "4px",
+    right: "4px",
+    fontSize: "1.4em",
+    fontWeight: "bold",
+    pointerEvents: "none"
+  });
+
+  info.el.appendChild(markDiv);
+},
   });
 
   calendar.render();

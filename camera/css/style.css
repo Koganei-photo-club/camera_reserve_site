@@ -405,3 +405,24 @@ footer p {
   background: #0056b3;
   transform: translateY(-2px);
 }
+
+#cameraButtons .camera-btn {
+  width: 100%;
+  margin: 0.4em 0;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+#cameraButtons .camera-btn:hover:not(.disabled) {
+  background: #0056b3;
+}
+
+#cameraButtons .camera-btn.disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}

@@ -1,9 +1,10 @@
 /**********************************************
  * 📷 カメラ貸出カレンダー 完全版
  *  - Cloudflare Worker (camera-proxy) 経由で予約取得
- *  - 予約期間を FullCalendar に表示
+ *  - 機材ごとに色分けされた貸出帯を表示
  *  - 日付クリック → カメラ選択 → Googleフォームにプリフィル
- *  - 借り始めは「今日から 7日後 以降」だけ予約可能
+ *  - 帯クリック → キャンセル申請モーダル → GAS で行削除
+ *  - 借り始めは「今日から 7日後 以降」だけ予約可
  **********************************************/
 
 document.addEventListener("DOMContentLoaded", async function () {
@@ -18,6 +19,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     "Canon EOS R10",
     "Nikon D3000"
   ];
+
+  // 🔧 機材ごとの色
+  const COLOR_MAP = {
+    "Canon EOS 5D Mark III": "#007bff", // 青
+    "Canon EOS R10":          "#28a745", // 緑
+    "Nikon D3000":            "#ff9800"  // オレンジ
+  };
 
   // 🔧 Googleフォーム（カメラ予約）のプリフィル URL（ベース）
   //  entry.389826105 = 借りたい機材
@@ -36,7 +44,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     const minStart = new Date(today);
     minStart.setDate(minStart.getDate() + 7); // 今日 + 7日
 
-    // info.dateStr は "YYYY-MM-DD" 形式
     const target = new Date(dateStr + "T00:00:00");
 
     return target >= minStart;
@@ -57,19 +64,30 @@ document.addEventListener("DOMContentLoaded", async function () {
     rawData = [];
   }
 
-    /****************************************
-   * 📌 貸出期間と重複しているか判定
+  /****************************************
+   * 🧮 end（返却予定日）の翌日を返す
+   *   FullCalendar の allDay イベントは end を含まないため
    ****************************************/
-  function isOverlapping(equipName, targetDate) {
-    const target = new Date(targetDate + "T00:00:00");
+  function datePlusOne(str) {
+    const d = new Date(str + "T00:00:00");
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().slice(0, 10);
+  }
 
-    return rawData.some(item => {
-      if (item.equip !== equipName) return false;
+  /****************************************
+   * 📌 特定の日付に、その機材の予約がかぶっているか？
+   *   → 日クリック時にボタンをグレーアウトする用
+   ****************************************/
+  function isCameraBookedAtDate(dateStr, equipName) {
+    const target = new Date(dateStr + "T00:00:00");
 
-      const start = new Date(item.start + "T00:00:00");
-      const end = new Date(item.end + "T00:00:00");
+    return rawData.some(r => {
+      if (r.equip !== equipName) return false;
+      if (!r.start || !r.end) return false;
 
-      return (target >= start && target <= end);
+      const s = new Date(r.start + "T00:00:00");
+      const e = new Date(r.end + "T00:00:00");
+      return s <= target && target <= e;
     });
   }
 
@@ -81,72 +99,24 @@ document.addEventListener("DOMContentLoaded", async function () {
   rawData.forEach(r => {
     if (!r.start || !r.end || !r.equip) return;
 
-    const start = new Date(r.start + "T00:00:00");
-    const end = new Date(r.end + "T00:00:00");
-
-    // FullCalendar の allDay イベントで「end は翌日」を指定
-    const endPlusOne = new Date(end);
-    endPlusOne.setDate(endPlusOne.getDate() + 1);
+    const color = COLOR_MAP[r.equip] || "#888888";
 
     events.push({
       title: `${r.equip} 貸出中`,
-      start: start.toISOString().split("T")[0],
-      end: endPlusOne.toISOString().split("T")[0],
-      allDay: true
+      start: r.start,                 // "YYYY-MM-DD"
+      end: datePlusOne(r.end),        // 翌日
+      allDay: true,
+      backgroundColor: color,
+      borderColor: color,
+      textColor: "#ffffff",
+      // 後からキャンセルに使うための情報
+      extendedProps: {
+        equip: r.equip,
+        startDate: r.start,
+        endDate: r.end
+      }
     });
   });
-
-/****************************************
- * 🎨 機材ごとに色分けしたイベントへ変換
- ****************************************/
-function convertReservationsToEvents(data) {
-  const colors = {
-    "Canon EOS 5D Mark III": {
-      bg: "rgba(0, 123, 255, 0.85)",
-      border: "#0056b3"
-    },
-    "Canon EOS R10": {
-      bg: "rgba(40, 167, 69, 0.85)",
-      border: "#1e7e34"
-    },
-    "Nikon D3000": {
-      bg: "rgba(255, 152, 0, 0.85)",
-      border: "#e07b00"
-    }
-  };
-
-  return data.map(item => {
-    if (!item.start || !item.end || !item.equip) return null;
-
-    const color = colors[item.equip] || {
-      bg: "rgba(100, 100, 100, 0.85)",
-      border: "#555"
-    };
-
-    return {
-      title: `${item.equip} 貸出中`,
-      start: item.start,
-      end: datePlusOne(item.end),
-      allDay: true,
-      backgroundColor: color.bg,
-      borderColor: color.border,
-      textColor: "white",
-
-      // 📌 イベントクリック時にキャンセル申請で使用
-      extendedProps: {
-        equip: item.equip,
-        start: item.start,
-        end: item.end
-      }
-    };
-  }).filter(e => e !== null);
-}
-
-function datePlusOne(str) {
-  const d = new Date(str);
-  d.setDate(d.getDate() + 1);
-  return d.toISOString().slice(0, 10);
-}
 
   /****************************************
    * 📅 カレンダー本体
@@ -155,13 +125,12 @@ function datePlusOne(str) {
     initialView: "dayGridMonth",
     locale: "ja",
     height: "auto",
-    events: convertReservationsToEvents(rawData),
+    events: events,
 
     // 日付クリック → カメラ選択モーダル
     dateClick: function (info) {
       const dateStr = info.dateStr; // "YYYY-MM-DD"
 
-      // 予約開始可能日チェック
       if (!isCameraStartAvailable(dateStr)) {
         alert(
           "カメラの予約は、借り始め予定日の 1週間前までに行ってください。\n" +
@@ -171,6 +140,14 @@ function datePlusOne(str) {
       }
 
       openDayModal(dateStr);
+    },
+
+    // 貸出帯クリック → キャンセル申請モーダル
+    eventClick: function (info) {
+      const ext = info.event.extendedProps;
+      if (!ext || !ext.equip) return;
+
+      openCancelModal(ext.equip, ext.startDate, ext.endDate);
     }
   });
 
@@ -195,20 +172,17 @@ function datePlusOne(str) {
 
     CAMERAS.forEach(equipName => {
       const btn = document.createElement("button");
-      btn.textContent = equipName + " を予約する";
+      const booked = isCameraBookedAtDate(dateStr, equipName);
 
-      // 🔥 重複チェック
-      const conflict = isOverlapping(equipName, dateStr);
+      btn.textContent = booked
+        ? `${equipName} はこの日付を含む期間は貸出中です`
+        : `${equipName} を予約する`;
 
-      if (conflict) {
-        // 重複 → ボタン無効化
+      btn.className = "camera-btn";
+      if (booked) {
         btn.disabled = true;
-        btn.style.background = "#ccc";
-        btn.style.color = "#666";
-        btn.style.cursor = "not-allowed";
-        btn.title = "この機材はこの期間すでに貸し出されています";
+        btn.classList.add("disabled");
       } else {
-        // 問題なし → クリック可
         btn.addEventListener("click", () => {
           openReserveForm(dateStr, equipName);
         });
@@ -231,4 +205,70 @@ function datePlusOne(str) {
 
     window.open(url, "_blank");
   }
+
+  /****************************************
+   * ❌ キャンセル申請モーダル
+   ****************************************/
+  const cancelModal   = document.getElementById("cancelModal");
+  const cancelTarget  = document.getElementById("cancelTarget");
+  const cancelNameEl  = document.getElementById("cancelName");
+  const cancelCodeEl  = document.getElementById("cancelCode");
+  const cancelSendBtn = document.getElementById("cancelSend");
+  const cancelCloseBtn= document.getElementById("cancelClose");
+  const cancelMsgEl   = document.getElementById("cancelMessage");
+
+  let cancelState = { equip: "", start: "", end: "" };
+
+  function openCancelModal(equip, start, end) {
+    cancelState = { equip, start, end };
+
+    cancelTarget.textContent = `${equip} / ${start} 〜 ${end}`;
+    cancelNameEl.value = "";
+    cancelCodeEl.value = "";
+    cancelMsgEl.textContent = "";
+
+    cancelModal.style.display = "flex";
+  }
+
+  cancelCloseBtn.addEventListener("click", () => {
+    cancelModal.style.display = "none";
+  });
+
+  cancelSendBtn.addEventListener("click", async () => {
+    const name = cancelNameEl.value.trim();
+    const auth = cancelCodeEl.value.trim();
+
+    if (!name || !auth) {
+      cancelMsgEl.textContent = "⚠️ 氏名と認証番号を入力してください。";
+      return;
+    }
+
+    const payload = {
+      requestType: "Cameraキャンセル",
+      equip: cancelState.equip,
+      start: cancelState.start,
+      end:   cancelState.end,
+      name:  name,
+      auth:  auth
+    };
+
+    try {
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+      cancelMsgEl.textContent = result.message || "サーバーからの応答が不正です。";
+
+      if (result.status === "success") {
+        setTimeout(() => location.reload(), 1500);
+      }
+
+    } catch (err) {
+      console.error(err);
+      cancelMsgEl.textContent = "⚠️ 通信エラーが発生しました。";
+    }
+  });
 });

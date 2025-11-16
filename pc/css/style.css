@@ -264,6 +264,53 @@ footer p {
     padding: 1em;
   }
 
+  /* =======================================
+   🔧 写真展用のセクションレイアウトを復旧
+======================================= */
+
+/* セクション全体 */
+.c-section {
+  padding: 2em 1em;
+  background: #fafafa;
+  margin: 2em 0;
+  border-top: 2px solid #333;
+}
+
+/* タイトル部分 */
+.c-section__heading {
+  text-align: center;
+  margin-bottom: 1.5em;
+}
+
+.c-section__heading--title span {
+  font-size: 1.4em;
+  font-weight: bold;
+  color: #333;
+}
+
+.c-section__heading--subtitle {
+  font-size: 0.9em;
+  color: #777;
+  margin-top: 0.3em;
+}
+
+/* コンテンツ部分（中央寄せ＋幅制限） */
+.c-section__container {
+  max-width: 800px;
+  margin: 0 auto;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* リストの見た目を調整 */
+.c-section__container ul {
+  padding-left: 1.2em;
+}
+
+.c-section__container li {
+  margin: 0.5em 0;
+}
+
   /* カレンダー */
   #calendar {
     width: 100%;

@@ -81,27 +81,49 @@ document.addEventListener("DOMContentLoaded", async function () {
   });
 
 /****************************************
- * 📌 予約期間 → 通常の帯イベントに変換
- *   → 左の例のように表示される
+ * 🎨 機材ごとに色分けしたイベントへ変換
  ****************************************/
 function convertReservationsToEvents(data) {
-  const list = [];
+  const colors = {
+    "Canon EOS 5D Mark III": {
+      bg: "rgba(0, 123, 255, 0.85)",
+      border: "#0056b3"
+    },
+    "Canon EOS R10": {
+      bg: "rgba(40, 167, 69, 0.85)",
+      border: "#1e7e34"
+    },
+    "Nikon D3000": {
+      bg: "rgba(255, 152, 0, 0.85)",
+      border: "#e07b00"
+    }
+  };
 
-  data.forEach(item => {
-    if (!item.start || !item.end || !item.equip) return;
+  return data.map(item => {
+    if (!item.start || !item.end || !item.equip) return null;
 
-    list.push({
+    const color = colors[item.equip] || {
+      bg: "rgba(100, 100, 100, 0.85)",
+      border: "#555"
+    };
+
+    return {
       title: `${item.equip} 貸出中`,
       start: item.start,
-      end: datePlusOne(item.end),  // FullCalendar の仕様で end は翌日にする
+      end: datePlusOne(item.end),
       allDay: true,
-      backgroundColor: "rgba(0, 123, 255, 0.85)",
-      borderColor: "#0056b3",
-      textColor: "white"
-    });
-  });
+      backgroundColor: color.bg,
+      borderColor: color.border,
+      textColor: "white",
 
-  return list;
+      // 📌 イベントクリック時にキャンセル申請で使用
+      extendedProps: {
+        equip: item.equip,
+        start: item.start,
+        end: item.end
+      }
+    };
+  }).filter(e => e !== null);
 }
 
 function datePlusOne(str) {

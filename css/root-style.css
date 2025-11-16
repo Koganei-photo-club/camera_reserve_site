@@ -76,3 +76,39 @@ h1.page-title {
 .news-section li {
   margin: 0.5em 0;
 }
+
+/* 全体のセンタリング用 */
+.center-section {
+  margin-top: 2em;
+  text-align: center; /* 見出しやボタンだけ中央に */
+}
+
+/* 説明文だけ左寄せにする */
+.description {
+  max-width: 600px;
+  margin: 1em auto;
+  line-height: 1.8;
+  text-align: left;       /* ← 中身は左寄せ */
+  padding: 0 1em;         /* ← スマホでも左右余白つけて読みやすく */
+  word-break: keep-all;   /* 変なところで折り返しにくくする */
+}
+
+/* ボタンの並び */
+.link-buttons {
+  margin-top: 1.5em;
+}
+
+/* ボタンを均等に中央揃え */
+.link-btn {
+  font-size: 1.2em;
+  display: inline-block;
+  margin: 0.5em 0.3em;
+}
+
+/* スマホ向け（幅が小さいときの調整） */
+@media (max-width: 480px) {
+  .description {
+    font-size: 1.05em;  
+    line-height: 1.85;
+  }
+}

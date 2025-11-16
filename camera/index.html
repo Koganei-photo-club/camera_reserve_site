@@ -7,6 +7,17 @@
 
   <link rel="icon" href="images/club-icon.JPG" type="image/jpeg">
   <link rel="stylesheet" href="css/style.css">
+  <script>
+  // maintenance.flag が存在したら強制メンテ
+  fetch("/maintenance.flag")
+    .then(r => {
+      if (r.ok) {
+        if (!location.pathname.includes("maintenance.html")) {
+          location.href = "/maintenance.html";
+        }
+      }
+    });
+  </script>
 </head>
 
 <body>

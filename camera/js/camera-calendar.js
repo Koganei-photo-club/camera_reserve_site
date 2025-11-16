@@ -217,6 +217,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   const cancelCloseBtn= document.getElementById("cancelClose");
   const cancelMsgEl   = document.getElementById("cancelMessage");
 
+  cancelCloseBtn.addEventListener("click", () => {
+    cancelModal.style.display = "none";
+  });
+
   let cancelState = { equip: "", start: "", end: "" };
 
   function openCancelModal(equip, start, end) {

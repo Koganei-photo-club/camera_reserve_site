@@ -269,16 +269,6 @@ function isPcSlotAvailable(dateStr) {
     window.open(url, "_blank");
   }
 
-  // PC予約の締切判定
-  function isPcSlotAvailable(dateStr) {
-    const today = new Date();
-    today.setHours(0,0,0,0);
-
-    const target = new Date(dateStr);
-      return target > today; // 今日より未来の日だけ可
-  }
-
-
   /************************************************
    * キャンセル申請
    ************************************************/

@@ -230,10 +230,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     cancelModal.style.display = "flex";
   }
 
-  cancelCloseBtn.addEventListener("click", () => {
-    cancelModal.style.display = "none";
-  });
-
   cancelSendBtn.addEventListener("click", async () => {
     const name = cancelNameEl.value.trim();
     const auth = cancelCodeEl.value.trim();
@@ -244,7 +240,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     const payload = {
-      requestType: "Cameraキャンセル",
+      action: "cancel",            // ← これだけで GAS が cancel と判定する
       equip: cancelState.equip,
       start: cancelState.start,
       end:   cancelState.end,
@@ -263,7 +259,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       cancelMsgEl.textContent = result.message || "サーバーからの応答が不正です。";
 
       if (result.status === "success") {
-        setTimeout(() => location.reload(), 1500);
+        setTimeout(() => location.reload(), 1000);
       }
 
     } catch (err) {

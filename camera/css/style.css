@@ -167,26 +167,11 @@ footer p {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* イベントツールチップ */
-.fc-tooltip {
-  position: absolute;
-  z-index: 1000;
-  background: rgba(0, 0, 0, 0.85);
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  display: none;
-  pointer-events: none;
-}
-
-/* カレンダーのヘッダー調整 */
 .fc-toolbar-title {
   font-size: 1.3em !important;
   color: #222;
 }
 
-/* ボタン色 */
 .fc-button-primary {
   background-color: darkblue !important;
   border: none !important;
@@ -196,195 +181,53 @@ footer p {
   background-color: navy !important;
 }
 
-/* ================================
-   レイアウトセクション
-   ================================ */
-.c-section {
-  padding: 2em 1em;
-  background: #fafafa;
-  margin: 2em 0;
-  border-top: 2px solid #333;
+/* ===============================
+   日別モーダル（PC/Camera 共通）
+   =============================== */
+.day-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
 }
 
-.c-section__heading {
+.day-box {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 350px;
+  width: 90%;
   text-align: center;
-  margin-bottom: 1.5em;
 }
 
-.c-section__heading--title span {
-  font-size: 1.4em;
-  font-weight: bold;
-  color: #333;
+.day-box button.slot {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  cursor: pointer;
 }
 
-.c-section__heading--subtitle {
-  font-size: 0.9em;
-  color: #777;
-  margin-top: 0.3em;
+.slot.free {
+  background: #e0f7ff;
 }
 
-.c-section__container {
-  max-width: 800px;
-  margin: 0 auto;
+.slot.booked {
+  background: #ffd6d6;
 }
 
-/* ================================
-   📱 スマホ・タブレット対応
-   ================================ */
-@media screen and (max-width: 768px) {
-  /* ヘッダー */
-  #main-header {
-    height: 60px;
-  }
-  .logo {
-    height: 32px;
-    margin-right: 0.6em;
-  }
-  .site-title h1 {
-    font-size: 1em;
-  }
-  .site-title p {
-    font-size: 0.8em;
-  }
-
-  /* ナビ */
-  .navbar ul {
-    flex-direction: row;
-    justify-content: space-evenly;
-    padding: 0.4em;
-  }
-  .navbar a {
-    font-size: 0.9em;
-    padding: 0.6em 0.8em;
-  }
-
-  /* 本文 */
-  main {
-    margin-top: 100px;
-    padding: 1em;
-  }
-
-  /* カレンダー */
-  #calendar {
-    width: 100%;
-    max-width: 95vw;
-    font-size: 0.8rem;
-  }
-
-  /* ボタン */
-  .button {
-    display: block;
-    width: 90%;
-    max-width: 300px;
-    margin: 0.5em auto;
-    padding: 0.9em;
-    font-size: 1em;
-    border-radius: 8px;
-  }
-
-  /* フッター */
-  footer {
-    font-size: 0.8em;
-    padding: 1em;
-  }
-}
-
-/* さらに小さい画面（480px以下） */
-@media screen and (max-width: 480px) {
-  .navbar ul {
-    flex-wrap: wrap;
-  }
-  .navbar a {
-    padding: 0.5em;
-    font-size: 0.8em;
-  }
-  .site-title h1 {
-    font-size: 0.9em;
-  }
-  .site-title p {
-    font-size: 0.75em;
-  }
-  h2 {
-    font-size: 1.1em;
-  }
-}
-
-/* ===== 貸出申請フォームボタンセクション ===== */
-.reserve-form {
-  text-align: center;
-  margin: 2em auto;
-  padding: 1.5em;
-  background: #fafafa;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  max-width: 600px;
-}
-
-.reserve-form h2 {
-  margin-bottom: 0.5em;
-  color: #333;
-}
-
-.reserve-form p {
-  margin-bottom: 1em;
-  color: #555;
-  line-height: 1.6;
-}
-
-.reserve-form .button {
-  display: inline-block;
-  padding: 0.8em 2em;
-  background: #007bff;
+.close-btn {
+  margin-top: 1em;
+  padding: 8px 14px;
+  background: #555;
   color: white;
   border-radius: 6px;
-  text-decoration: none;
-  font-weight: bold;
-  transition: background 0.3s ease;
-}
-
-.reserve-form .button:hover {
-  background: #0056b3;
-}
-
-/* 📱 スマホ対応 */
-@media (max-width: 600px) {
-  .reserve-form {
-    margin: 1em;
-    padding: 1em;
-  }
-  .reserve-form .button {
-    width: 100%;
-    box-sizing: border-box;
-  }
-}
-
-/* ===== 📱 スマホ用フローティング申請ボタン ===== */
-.floating-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #007bff;
-  color: white;
-  font-weight: bold;
-  padding: 0.9em 1.3em;
-  border-radius: 50px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
-  text-decoration: none;
-  font-size: 1em;
-  z-index: 1000;
-  display: none; /* デフォルト非表示（PCでは出さない） */
-}
-
-/* ホバー効果（PCで見るときもきれい） */
-.floating-button:hover {
-  background-color: #0056b3;
-}
-
-/* 📱 スマホ専用で表示 */
-@media (max-width: 768px) {
-  .floating-button {
-    display: inline-block;
-  }
+  cursor: pointer;
 }
 
 /* ==============================
@@ -394,7 +237,7 @@ footer p {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  display: flex;
+  display: none;
   justify-content: center;
   align-items: center;
   z-index: 9999;
@@ -435,10 +278,12 @@ footer p {
 #cancelConfirm { background-color: #d9534f; }
 #cancelClose { background-color: #6c757d; }
 
-/* ===== カメラ一覧（画像サイズ調整） ===== */
+/* ==============================
+   カメラ画像ギャラリー
+============================== */
 .work-gallery {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* PCでは3列 */
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5em;
   margin-top: 2em;
 }
@@ -462,17 +307,36 @@ footer p {
   padding: 1em;
 }
 
-/* ===== 📱 スマホ・タブレット対応 ===== */
+/* 📱 スマホ対応 */
 @media screen and (max-width: 768px) {
+  #main-header { height: 60px; }
+  .logo { height: 32px; margin-right: 0.6em; }
+  .site-title h1 { font-size: 1em; }
+  .site-title p { font-size: 0.8em; }
+
+  .navbar ul {
+    flex-direction: row;
+    justify-content: space-evenly;
+  }
+
+  main {
+    margin-top: 100px;
+  }
+
+  #calendar {
+    width: 100%;
+    max-width: 95vw;
+    font-size: 0.8rem;
+  }
+
   .work-gallery {
-    display: flex;          /* ← grid を flex に変更 */
-    flex-direction: column; /* ← 縦並びに */
+    display: flex;
+    flex-direction: column;
     align-items: center;
   }
 
   .work-card {
-    width: 90%;             /* ← 1枚を画面いっぱいに */
+    width: 90%;
     max-width: 400px;
   }
 }
-

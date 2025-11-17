@@ -7,6 +7,12 @@
  *  - 借り始めは「今日から 7日後 以降」だけ予約可
  **********************************************/
 
+// ローカル日付を安全に作る関数
+function toLocalDate(yyyy_mm_dd) {
+  const [y, m, d] = yyyy_mm_dd.split("-").map(Number);
+  return new Date(y, m -1, d);    //これがローカル日付になる
+}
+
 document.addEventListener("DOMContentLoaded", async function () {
   const calendarEl = document.getElementById("calendar");
 
@@ -67,8 +73,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     return rawData.some(r => {
       if (r.equip !== equip) return false;
       if (!r.start || !r.end) return false;
-      const s = new Date(r.start + "T00:00:00");
-      const e = new Date(r.end + "T00:00:00");
+      const s = toLocalDate(r.start);
+      const e = toLocalDate(r.end);
       return s <= t && t <= e;
     });
   }
@@ -78,10 +84,10 @@ document.addEventListener("DOMContentLoaded", async function () {
    ****************************************/
   function getAvailableReturnDates(startDate, equipName) {
 
-    const start = new Date(startDate + "T00:00:00");
+    const start = toLocalDate(startDate);
 
     // 最大 7日間
-    const maxEnd = new Date(start);
+    const maxEnd = new Date(start.getTime());
     maxEnd.setDate(maxEnd.getDate() + 6);
 
     // 次予約の開始日
@@ -99,7 +105,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     let limit = maxEnd;
 
     if (nextStart) {
-      const dayBefore = new Date(nextStart);
+      const dayBefore = new Date(nextStart.getTime());
       dayBefore.setDate(dayBefore.getDate() - 1);
       if (dayBefore < limit) limit = dayBefore;
     }
@@ -108,7 +114,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     let cur = new Date(start);
 
     while (cur <= limit) {
-      result.push(cur.toISOString().slice(0,10));
+      result.push(
+        `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-${String(cur.getDate()).padStart(2, "0")}`
+      );
       cur.setDate(cur.getDate() + 1);
     }
 

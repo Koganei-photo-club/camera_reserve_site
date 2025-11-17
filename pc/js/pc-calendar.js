@@ -267,6 +267,10 @@ function isPcSlotAvailable(dateStr) {
       + `&entry.780927556=${encodeURIComponent(slot)}`;
 
     window.open(url, "_blank");
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   }
 
   /************************************************

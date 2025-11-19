@@ -482,6 +482,7 @@ footer p {
   align-items: center;
   z-index: 20000;
   overflow: hidden;
+  backdrop-filter: blur(2px);
 }
 
 .cancel-box {
@@ -493,6 +494,7 @@ footer p {
   width: 90%;
   max-width: 380px;
   text-align: center;
+  font-size: 1rem;
 }
 
 .cancel-box input {
@@ -507,6 +509,7 @@ footer p {
   display: flex;
   justify-content: space-between;
   margin-top: 1rem;
+  font-size: 1rem;
 }
 
 .cancel-buttons button {
@@ -517,6 +520,7 @@ footer p {
   border-radius: 4px;
   color: white;
   cursor: pointer;
+  font-size: 1rem;
 }
 
 #cancelConfirm { background-color: #d9534f; }
@@ -805,7 +809,7 @@ footer p {
   display: none;                  /* show を JS で付ける */
   justify-content: center;
   align-items: center;
-  z-index: 30000;
+  z-index: 9999;
   padding: 20px;
   overflow-y: auto;               /* ← 画面に収まらない対策 */
 }
@@ -904,19 +908,17 @@ footer p {
    キャンセル申請モーダル（統一スタイル）
 ============================== */
 
-.cancel-modal {
-  backdrop-filter: blur(2px);
-}
 
-.cancel-box {
+
+/* .cancel-box {
   border-radius: 16px;
   box-shadow: 0 8px 22px rgba(0,0,0,0.15);
   padding: 2rem 1.6rem;
-}
+} */
 
 .cancel-buttons button {
   border-radius: 10px;
-  font-size: 1rem;
+  
   padding: 0.7em;
 }
 

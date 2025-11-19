@@ -627,3 +627,16 @@ footer p {
   transform: translateY(0);
   opacity: 1;
 }
+
+/* ===============================
+   📱 アプリ風ページ遷移アニメーション
+=============================== */
+
+.page-transition {
+  opacity: 1;
+  transition: opacity 0.35s ease-in-out;
+}
+
+.page-transition.fade-out {
+  opacity: 0;
+}

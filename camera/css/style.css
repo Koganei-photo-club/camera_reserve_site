@@ -231,7 +231,7 @@ footer p {
 /* ===============================
    PC/旧版日別モーダル（残す）
    =============================== */
-.day-modal {
+/* .day-modal {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.5);
@@ -248,7 +248,7 @@ footer p {
   max-width: 350px;
   width: 90%;
   text-align: center;
-}
+} */
 
 .day-box button.slot {
   width: 100%;
@@ -546,4 +546,26 @@ footer p {
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
+}
+
+.day-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 20000;
+  overflow-y: auto;
+}
+
+.day-box {
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 380px;
+  text-align: center;
 }

@@ -225,7 +225,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   const cameraBtns = document.getElementById("cameraButtons");
   const dayClose   = document.getElementById("dayClose");
 
-  dayClose.onclick = () => dayModal.style.display = "none";
+  dayClose.onclick = () => {
+    dayModal.classList.remove("show");
+    setTimeout(() => dayModal.style.display = "none", 250);
+  };
 
   function openDayModal(dateStr) {
     dayTitle.textContent = `${dateStr} から借り始め`;
@@ -250,6 +253,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     dayModal.style.display = "flex";
+    dayModal.classList.add("show");
   }
 
   /****************************************
@@ -262,7 +266,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const closeReturnBtn = document.getElementById("closeReturn");
 
   closeReturnBtn.onclick = () => {
-    returnModal.style.display = "none";
+    returnModal.classList.remove("show");
+    setTimeout(() => returnModal.style.display = "none", 250);
   };
 
   function openReturnModal(startDate, equipName) {
@@ -286,6 +291,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
 
     returnModal.style.display = "flex";
+    returnModal.classList.add("show");
   }
 
   /****************************************
@@ -300,7 +306,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const cancelMsgEl   = document.getElementById("cancelMessage");
 
   cancelCloseBtn.onclick = () => {
-    cancelModal.style.display = "none";
+    cancelModal.classList.remove("show");
+    setTimeout(() => cancelModal.style.display = "none", 250);
   };
 
   let cancelState = { equip: "", start: "", end: "" };
@@ -312,6 +319,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     cancelNameEl.value = "";
     cancelCodeEl.value = "";
     cancelModal.style.display = "flex";
+    cancelModal.classList.add("show");
   }
 
   cancelSendBtn.onclick = async () => {

@@ -1,10 +1,9 @@
 /* service-worker.js */
 // ===============================
-// 📸 法政大学 小金井写真部 予約システム PWA SW（修正版）
+// 📸 法政大学 小金井写真部 予約システム PWA SW（最終安定版）
 // ===============================
 
-// キャッシュ名（更新時はバージョンを上げる）
-const CACHE_NAME = "photo-club-cache-v3";
+const CACHE_NAME = "photo-club-cache-v4";
 
 const ASSETS = [
   "/reserve_site/",
@@ -30,11 +29,10 @@ const ASSETS = [
   "/reserve_site/icons/icon-180.png"
 ];
 
+
 // install
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(ASSETS)));
   self.skipWaiting();
 });
 
@@ -42,27 +40,30 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.map((key) => key !== CACHE_NAME ? caches.delete(key) : null))
+      Promise.all(
+        keys.map((key) => (key !== CACHE_NAME ? caches.delete(key) : null))
+      )
     )
   );
   self.clients.claim();
 });
 
-// fetch（POST や GAS への通信はキャッシュから外す）
+// fetch
 self.addEventListener("fetch", (event) => {
 
-  // ★ 1. POST リクエストは無条件で bypass（超重要）
+  // 🟥 1. POST は完全にバイパス
   if (event.request.method !== "GET") {
-    return; // ブラウザがそのまま fetch する
+    return;
   }
 
-  // ★ 2. GAS や API へのアクセスも bypass
   const url = event.request.url;
+
+  // 🟥 2. GAS など外部 API はキャッシュせずバイパス
   if (url.includes("script.google.com") || url.includes("googleusercontent.com")) {
-    return; // キャッシュ禁止
+    return;
   }
 
-  // ★ 3. 通常の GET はキャッシュ優先
+  // 🟦 3. GitHub Pages の GET をキャッシュ優先で返す
   event.respondWith(
     caches.match(event.request).then((cached) => {
       return cached || fetch(event.request);

@@ -329,7 +329,7 @@ let APPLY_END = null;
 let APPLY_EQUIP = null;
 
 // 返却日モーダルから呼び出される
-function openApplyModal(start, end, equip) {
+window.openApplyModal = function(start, end, equip) {
   APPLY_START = start;
   APPLY_END = end;
   APPLY_EQUIP = equip;
@@ -342,7 +342,8 @@ function openApplyModal(start, end, equip) {
   applyMsg.textContent = "";
 
   applyModal.style.display = "flex";
-}
+  applyModal.classList.add("show");
+};
 
 
 // ---- APIに送信 ----

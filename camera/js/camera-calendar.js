@@ -4,6 +4,9 @@
  *  - CAMERAS 配列を完全撤廃し、DB の内容に自動対応
  **********************************************/
 
+let startDate_global = null;
+let equip_global = null;
+
 function toLocalDate(yyyy_mm_dd) {
   const [y, m, d] = yyyy_mm_dd.split("-").map(Number);
   return new Date(y, m - 1, d);
@@ -245,27 +248,32 @@ document.addEventListener("DOMContentLoaded", async function () {
   const returnSelect = document.getElementById("returnSelect");
   const goFormBtn = document.getElementById("goForm");
 
-  function openReturnModal(startDate, equipName) {
-    const dates = getAvailableReturnDates(startDate, equipName);
+function openReturnModal(startDate, equipName) {
 
-    returnInfo.textContent = `${equipName}（借り始め：${startDate}）の返却予定日：`;
-    returnSelect.innerHTML = "";
+  // ★ ここで値を保存する！
+  startDate_global = startDate;
+  equip_global = equipName;
 
-    dates.forEach(d => {
-      const opt = document.createElement("option");
-      opt.value = d;
-      opt.textContent = d;
-      returnSelect.appendChild(opt);
-    });
+  const dates = getAvailableReturnDates(startDate, equipName);
 
-    goFormBtn.onclick = () => {
-      const endDate = returnSelect.value;
-      openReserveForm(startDate, equipName, endDate);
-    };
+  returnInfo.textContent = `${equipName}（借り始め：${startDate}）の返却予定日：`;
+  returnSelect.innerHTML = "";
 
-    returnModal.style.display = "flex";
-    returnModal.classList.add("show");
-  }
+  dates.forEach(d => {
+    const opt = document.createElement("option");
+    opt.value = d;
+    opt.textContent = d;
+    returnSelect.appendChild(opt);
+  });
+
+  goFormBtn.onclick = () => {
+    const endDate = returnSelect.value;
+    openApplyModal(startDate_global, endDate, equip_global);
+  };
+
+  returnModal.style.display = "flex";
+  returnModal.classList.add("show");
+}
 
   document.getElementById("closeReturn").onclick = () => {
     returnModal.classList.remove("show");
@@ -296,3 +304,89 @@ document.addEventListener("DOMContentLoaded", async function () {
   };
 
 });
+
+/****************************************
+ * 📌 予約申請（UX 版：フォームに飛ばない）
+ ****************************************/
+
+const applyModal = document.getElementById("applyModal");
+const applyEquip = document.getElementById("applyEquip");
+const applyPeriod = document.getElementById("applyPeriod");
+const applyName = document.getElementById("applyName");
+const applyLine = document.getElementById("applyLine");
+const applyMsg = document.getElementById("applyMsg");
+
+let APPLY_START = null;
+let APPLY_END = null;
+let APPLY_EQUIP = null;
+
+// 返却日モーダルから呼び出される
+function openApplyModal(start, end, equip) {
+  APPLY_START = start;
+  APPLY_END = end;
+  APPLY_EQUIP = equip;
+
+  applyEquip.textContent = `機材：${equip}`;
+  applyPeriod.textContent = `期間：${start} 〜 ${end}`;
+
+  applyName.value = "";
+  applyLine.value = "";
+  applyMsg.textContent = "";
+
+  applyModal.style.display = "flex";
+}
+
+
+// 返却モーダルの確定ボタンを書き換える
+// goFormBtn.onclick = () => {
+//   const endDate = returnSelect.value;
+//   openApplyModal(currentStartDate, endDate, currentEquipName);
+// };
+
+
+// ---- APIに送信 ----
+document.getElementById("applySend").onclick = async () => {
+  applyMsg.textContent = "送信中…";
+
+  const API_URL = "https://script.google.com/macros/s/AKfycbypCFljTKHPqTahcZtSX0IQp4ZJN_Uz00OW5l-D_DvIOZtlUdQ5UB-zhmgqHYICalT2YA/exec";
+
+  const payload = {
+    name: applyName.value.trim(),
+    lineName: applyLine.value.trim(),
+    equip: APPLY_EQUIP,
+    start: APPLY_START,
+    end: APPLY_END
+  };
+
+  if (!payload.name || !payload.lineName) {
+    applyMsg.textContent = "❌ 氏名と LINE の名前を入力してください。";
+    return;
+  }
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify(payload),
+      headers: { "Content-Type": "application/json" }
+    });
+
+    const json = await res.json();
+
+    if (json.result === "success") {
+      applyMsg.textContent = `✔ 予約完了！ 認証コード: ${json.code}`;
+      setTimeout(() => {
+        applyModal.style.display = "none";
+        location.reload();
+      }, 1200);
+    } else {
+      applyMsg.textContent = "❌ 送信失敗：" + json.message;
+    }
+
+  } catch (err) {
+    applyMsg.textContent = "❌ ネットワークエラー：" + err;
+  }
+};
+
+document.getElementById("applyClose").onclick = () => {
+  applyModal.style.display = "none";
+};

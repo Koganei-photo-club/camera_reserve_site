@@ -195,6 +195,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const cameraBtns = document.getElementById("cameraButtons");
 
   function openDayModal(dateStr) {
+    console.log("🔥 openDayModal start", dateStr);
     console.log("👉 CAMERA_LIST:", CAMERA_LIST);
     console.log("👉 rawData:", rawData);
     CAMERA_LIST.forEach(c => {

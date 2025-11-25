@@ -274,6 +274,8 @@ function openReturnModal(startDate, equipName) {
   });
 
   goFormBtn.onclick = () => {
+    console.log("goFormBtn clicked");
+    console.log("typeof openApplyModal:", typeof openApplyModal);
     const endDate = returnSelect.value;
     openApplyModal(startDate_global, endDate, equip_global);
   };

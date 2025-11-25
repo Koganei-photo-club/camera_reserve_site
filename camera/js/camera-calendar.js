@@ -195,6 +195,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   const cameraBtns = document.getElementById("cameraButtons");
 
   function openDayModal(dateStr) {
+    console.log("👉 CAMERA_LIST:", CAMERA_LIST);
+    console.log("👉 rawData:", rawData);
+    
     dayTitle.textContent = `${dateStr} の貸出可能カメラ`;
 
     cameraBtns.innerHTML = "";

@@ -337,13 +337,6 @@ function openApplyModal(start, end, equip) {
 }
 
 
-// 返却モーダルの確定ボタンを書き換える
-// goFormBtn.onclick = () => {
-//   const endDate = returnSelect.value;
-//   openApplyModal(currentStartDate, endDate, currentEquipName);
-// };
-
-
 // ---- APIに送信 ----
 document.getElementById("applySend").onclick = async () => {
   applyMsg.textContent = "送信中…";

@@ -330,6 +330,11 @@ let APPLY_EQUIP = null;
 
 // 返却日モーダルから呼び出される
 window.openApplyModal = function(start, end, equip) {
+
+   // 🔥 カメラ選択モーダル & 返却日選択モーダルを閉じる
+  document.getElementById("dayModal").style.display = "none";
+  document.getElementById("returnModal").style.display = "none";
+  
   APPLY_START = start;
   APPLY_END = end;
   APPLY_EQUIP = equip;

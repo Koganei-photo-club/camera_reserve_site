@@ -132,6 +132,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     setTimeout(() => (el.style.display = "none"), 300);
   };
 
+  /****************************************
+ * ❌ キャンセル申請用 DOM 取得
+ ****************************************/
+  const cancelModal = document.getElementById("cancelModal");
+  const cancelTarget = document.getElementById("cancelTarget");
+  const cancelName = document.getElementById("cancelName");
+  const cancelCode = document.getElementById("cancelCode");
+  const cancelMsg = document.getElementById("cancelMessage");
+
 
   /****************************************
    * 📌 カメラ選択モーダル

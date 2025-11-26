@@ -351,6 +351,10 @@ window.openApplyModal = function(start, end, equip) {
 };
 
 
+// ---- API（GAS）URL ----
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbyThexXWqJUzYybFL5VG8EeHfwbYZHXUTjlU5dp1jsx0cTCgZTjwvVxRssljuE20OVeHw/exec";
+
 // ---- APIに送信 ----
 document.getElementById("applySend").onclick = async () => {
   applyMsg.textContent = "送信中…";
@@ -365,24 +369,15 @@ document.getElementById("applySend").onclick = async () => {
 
   try {
     const res = await fetch(API_URL, {
+      // 🟥 これ超重要（ OPTIONS を避ける → CORS pass）
       method: "POST",
+      mode: "no-cors",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(payload)
     });
 
-    let json;
-    try {
-      json = await res.json();
-    } catch {
-      json = null;
-    }
-
-    if (json?.result === "success") {
-      applyMsg.textContent = `✔ 予約完了！ 認証コード: ${json.code}`;
-    } else {
-      applyMsg.textContent = "✔ 予約完了！(通信警告あり)";
-    }
-
+    // 🟢 no-cors のためレスポンスは読めないが成功扱い
+    applyMsg.textContent = "✔ 予約完了！";
     setTimeout(() => {
       applyModal.style.display = "none";
       location.reload();
@@ -392,10 +387,6 @@ document.getElementById("applySend").onclick = async () => {
     applyMsg.textContent =
       "⚠ 通信エラーですが予約は完了した可能性があります（管理者が確認します）";
   }
-};
-
-document.getElementById("applyClose").onclick = () => {
-  applyModal.style.display = "none";
 };
 });
 

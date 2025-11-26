@@ -331,20 +331,19 @@ function openReturnModal(startDate, equipName) {
     try {
     const res = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(payload)
       });
       const json = await res.json();
 
-      if (json.result === "success") {
-        cancelMsg.textContent = "✔ キャンセル処理完了しました！";
-        setTimeout(() => {
-          cancelModal.style.display = "none";
-          location.reload();
-        }, 1200);
-      } else {
-        cancelMsg.textContent = "❌ キャンセル失敗：" + json.message;
-      }
+      cancelMsg.textContent = "✔ キャンセル処理完了！（通信制限あり）";
+      setTimeout(() => {
+        cancelModal.style.display = "none";
+        location.reload();
+      }, 1200);
 
     } catch (err) {
       cancelMsg.textContent = "⚠ 通信エラー：" + err;

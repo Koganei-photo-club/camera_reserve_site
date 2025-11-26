@@ -198,8 +198,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     const payload = {
       mode: "cancel",
       name: cancelName.value.trim(),
-      code: cancelCode.value.trim()
+      code: cancelCode.value.trim(),
+      equip: cancelTarget.textContent.split(" / ")[0],
+      start: cancelTarget.textContent.split(" / ")[1].split("〜")[0],
+      end: cancelTarget.textContent.split("〜")[1]
     };
+
+    if (!payload.name || !payload.code) {
+      cancelMsg.textContent = "❌ 氏名と認証コードを入力してください。";
+      return;
+    }
 
     await fetch(API_URL, {
       method: "POST",
@@ -207,8 +215,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(payload)
     });
-
-    document.getElementById("cancelMessage").textContent = "✔ キャンセル完了！";
+    cancelMsg.textContent = "✔ キャンセル処理完了！";
     setTimeout(() => location.reload(), 600);
   };
 

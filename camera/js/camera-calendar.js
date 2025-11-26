@@ -2,66 +2,51 @@
  * 📷 カメラ貸出カレンダー（DB + GAS API 連携）
  **********************************************/
 
-// ---- 共通 予約/キャンセル API URL ----
 const API_URL =
   "https://script.google.com/macros/s/AKfycbyThexXWqJUzYybFL5VG8EeHfwbYZHXUTjlU5dp1jsx0cTCgZTjwvVxRssljuE20OVeHw/exec";
 
-// ---- 予約DB（Cloudflare Worker）----
 const apiUrl = "https://camera-proxy.photo-club-at-koganei.workers.dev/";
-
-// ---- カメラDB（GAS Read 用）----
 const CAMERA_DB_URL =
   "https://script.google.com/macros/s/AKfycbyHEx_s2OigM_JCYkanCdf9NQU7mcGGHOUC__OPSBqTuA7TfA-cCrbskM-NrYIwflsT/exec";
 
-// ---- 日付処理 ----
 function toLocalDate(yyyy_mm_dd) {
   const [y, m, d] = yyyy_mm_dd.split("-").map(Number);
   return new Date(y, m - 1, d);
 }
 
-// 借り始め・返却日・機材保持
-let startDate_global = null;
-let equip_global = null;
+let APPLY_START = null;
+let APPLY_END = null;
+let APPLY_EQUIP = null;
 
-
-// ==============================
-// DOM 読み込み完了後
-// ==============================
 document.addEventListener("DOMContentLoaded", async function () {
-
+  
   const calendarEl = document.getElementById("calendar");
   const goFormBtn = document.getElementById("goForm");
   const returnSelect = document.getElementById("returnSelect");
 
-  /****************************************
-   * 📌 カメラ DB 読み込み
-   ****************************************/
   let CAMERA_LIST = [];
   let COLOR_MAP = {};
+
   try {
     const camRes = await fetch(CAMERA_DB_URL);
     CAMERA_LIST = await camRes.json();
     const colors = ["#007bff", "#28a745", "#ff9800", "#9c27b0", "#3f51b5", "#ff5722"];
-    CAMERA_LIST.forEach((cam, i) =>
-      COLOR_MAP[cam.name] = colors[i % colors.length]
-    );
+    CAMERA_LIST.forEach((cam, i) => COLOR_MAP[cam.name] = colors[i % colors.length]);
   } catch (err) {
-    console.error("❌ カメラ DB 取得失敗", err);
+    console.error("❌ CAMERA DB error:", err);
   }
 
-  /****************************************
-   * 📌 予約データ取得
-   ****************************************/
+
   let rawData = [];
   try {
-    rawData = await (await fetch(apiUrl)).json();
+    const res = await fetch(apiUrl);
+    rawData = await res.json();
   } catch (err) {
-    console.error("❌ 予約 DB 取得失敗:", err);
+    console.error("❌ Reservations DB error:", err);
   }
 
-  /****************************************
-   * 📌 特定日が予約済みか？
-   ****************************************/
+
+
   function isCameraBookedAtDate(dateStr, equipName) {
     const t = new Date(dateStr + "T00:00:00");
     return rawData.some(r => {
@@ -72,9 +57,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
 
-  /****************************************
-   * 📌 返却予定日候補生成
-   ****************************************/
   function getAvailableReturnDates(startDate, equip) {
     const start = new Date(startDate + "T00:00:00");
     const maxEnd = new Date(start);
@@ -88,8 +70,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     let limit = nextStart ? new Date(nextStart - 86400000) : maxEnd;
-    let result = [];
+    const result = [];
     let cur = new Date(start);
+
     while (cur <= limit) {
       result.push(cur.toISOString().slice(0, 10));
       cur.setDate(cur.getDate() + 1);
@@ -97,9 +80,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     return result;
   }
 
-  /****************************************
-   * 📌 カレンダー生成
-   ****************************************/
+
   const events = rawData.map(r => {
     const endPlus1 = new Date(r.end + "T00:00:00");
     endPlus1.setDate(endPlus1.getDate() + 1);
@@ -107,21 +88,21 @@ document.addEventListener("DOMContentLoaded", async function () {
       title: `${r.equip} 貸出中`,
       start: r.start,
       end: endPlus1.toISOString().slice(0, 10),
-      allDay: true,
       backgroundColor: COLOR_MAP[r.equip] || "#999",
       borderColor: COLOR_MAP[r.equip],
       textColor: "#fff",
-      extendedProps: r
+      extendedProps: r,
+      allDay: true
     };
   });
+
 
   const calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: "dayGridMonth",
     locale: "ja",
     events,
     dateClick(info) {
-      const min = new Date();
-      min.setDate(min.getDate() + 7);
+      const min = new Date(); min.setDate(min.getDate() + 7);
       if (toLocalDate(info.dateStr) < min) {
         alert("借り始めは今日から7日後以降です");
         return;
@@ -135,21 +116,35 @@ document.addEventListener("DOMContentLoaded", async function () {
   });
   calendar.render();
 
-  /****************************************
-   * 📌 貸出開始モーダル
-   ****************************************/
-  const dayModal = document.getElementById("dayModal");
-  const dayTitle = document.getElementById("dayTitle");
-  const cameraBtns = document.getElementById("cameraButtons");
 
+  /****************************************
+   * 📌 モーダル管理
+   ****************************************/
+
+  const showModal = id => {
+    const el = document.getElementById(id);
+    el.style.display = "flex";
+    el.classList.add("show");
+  };
+  const hideModal = id => {
+    const el = document.getElementById(id);
+    el.classList.remove("show");
+    setTimeout(() => (el.style.display = "none"), 300);
+  };
+
+
+  /****************************************
+   * 📌 カメラ選択モーダル
+   ****************************************/
   function openDayModal(dateStr) {
-    dayTitle.textContent = `${dateStr} の貸出可能カメラ`;
+
+    const cameraBtns = document.getElementById("cameraButtons");
     cameraBtns.innerHTML = "";
 
     CAMERA_LIST.forEach(cam => {
       const btn = document.createElement("button");
-      btn.textContent = cam.name;
       btn.className = "camera-btn";
+      btn.textContent = cam.name;
       if (isCameraBookedAtDate(dateStr, cam.name)) {
         btn.textContent += "（貸出中）";
         btn.disabled = true;
@@ -159,58 +154,47 @@ document.addEventListener("DOMContentLoaded", async function () {
       cameraBtns.appendChild(btn);
     });
 
-    dayModal.style.display = "flex";
+    showModal("dayModal");
   }
 
   document.getElementById("dayClose").onclick =
-    () => dayModal.style.display = "none";
+    () => hideModal("dayModal");
 
 
   /****************************************
-   * 📌 返却予定日選択
+   * 📌 返却日選択モーダル
    ****************************************/
-  const returnModal = document.getElementById("returnModal");
-
   function openReturnModal(startDate, equip) {
-    startDate_global = startDate;
-    equip_global = equip;
+
+    APPLY_START = startDate;
+    APPLY_EQUIP = equip;
 
     returnSelect.innerHTML = "";
     getAvailableReturnDates(startDate, equip).forEach(d => {
-      returnSelect.insertAdjacentHTML(
-        "beforeend",
-        `<option value="${d}">${d}</option>`
-      );
+      returnSelect.insertAdjacentHTML("beforeend",
+        `<option value="${d}">${d}</option>`);
     });
 
-    returnModal.style.display = "flex";
-    dayModal.style.display = "none";
+    hideModal("dayModal");
+    showModal("returnModal");
   }
 
   document.getElementById("closeReturn").onclick =
-    () => returnModal.style.display = "none";
+    () => hideModal("returnModal");
 
 
   /****************************************
    * ❌ キャンセル申請
    ****************************************/
-  const cancelModal = document.getElementById("cancelModal");
-  const cancelTarget = document.getElementById("cancelTarget");
-  const cancelName = document.getElementById("cancelName");
-  const cancelCode = document.getElementById("cancelCode");
-  const cancelMsg = document.getElementById("cancelMessage");
-
   function openCancelModal(equip, start, end) {
-    cancelTarget.textContent = `${equip} / ${start}〜${end}`;
-    cancelMsg.textContent = "";
-    cancelModal.style.display = "flex";
+    document.getElementById("cancelTarget").textContent = `${equip} / ${start}〜${end}`;
+    showModal("cancelModal");
   }
 
   document.getElementById("cancelClose").onclick =
-    () => cancelModal.style.display = "none";
+    () => hideModal("cancelModal");
 
   document.getElementById("cancelSend").onclick = async () => {
-    cancelMsg.textContent = "送信中…";
     const payload = {
       mode: "cancel",
       name: cancelName.value.trim(),
@@ -224,7 +208,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       body: JSON.stringify(payload)
     });
 
-    cancelMsg.textContent = "✔ キャンセル完了！";
+    document.getElementById("cancelMessage").textContent = "✔ キャンセル完了！";
     setTimeout(() => location.reload(), 600);
   };
 
@@ -232,30 +216,30 @@ document.addEventListener("DOMContentLoaded", async function () {
   /****************************************
    * 📌 予約申請（UX版）
    ****************************************/
-  const applyModal = document.getElementById("applyModal");
-  const applyEquip = document.getElementById("applyEquip");
-  const applyPeriod = document.getElementById("applyPeriod");
-  const applyName = document.getElementById("applyName");
-  const applyLine = document.getElementById("applyLine");
-  const applyMsg = document.getElementById("applyMsg");
-
   window.openApplyModal = function(start, end, equip) {
-    applyEquip.textContent = `機材：${equip}`;
-    applyPeriod.textContent = `${start} 〜 ${end}`;
-    applyModal.style.display = "flex";
-    returnModal.style.display = "none";
+
+    APPLY_END = end;
+    APPLY_EQUIP = equip;
+
+    document.getElementById("applyEquip").textContent = `機材：${equip}`;
+    document.getElementById("applyPeriod").textContent = `${start} 〜 ${end}`;
+
+    hideModal("returnModal");
+    showModal("applyModal");
   };
 
+  document.getElementById("applyClose").onclick =
+    () => hideModal("applyModal");
+
   document.getElementById("applySend").onclick = async () => {
-    applyMsg.textContent = "送信中…";
 
     const payload = {
       mode: "reserve",
       name: applyName.value.trim(),
       lineName: applyLine.value.trim(),
-      equip: equip_global,
-      start: startDate_global,
-      end: returnSelect.value
+      equip: APPLY_EQUIP,
+      start: APPLY_START,
+      end: APPLY_END
     };
 
     await fetch(API_URL, {
@@ -265,11 +249,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       body: JSON.stringify(payload)
     });
 
-    applyMsg.textContent = "✔ 予約完了！";
+    document.getElementById("applyMsg").textContent = "✔ 予約完了！";
     setTimeout(() => location.reload(), 600);
   };
 
-  document.getElementById("applyClose").onclick =
-    () => applyModal.style.display = "none";
-
-});
+}); // END DOMContentLoaded

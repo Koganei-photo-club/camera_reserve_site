@@ -312,6 +312,44 @@ function openReturnModal(startDate, equipName) {
     cancelModal.style.display = "none";
   };
 
+  // ---- キャンセル送信 ----
+  document.getElementById("cancelSend").onclick = async () => {
+
+    cancelMsg.textContent = "送信中…";
+
+    const payload = {
+      mode: "cancel",
+      name: cancelName.value.trim(),
+      code: cancelCode.value.trim()
+    };
+
+    if (!payload.name || !payload.code) {
+      cancelMsg.textContent = "❌ 氏名と認証コードを入力してください。";
+      return;
+    }
+
+    try {
+    const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+
+      if (json.result === "success") {
+        cancelMsg.textContent = "✔ キャンセル処理完了しました！";
+        setTimeout(() => {
+          cancelModal.style.display = "none";
+          location.reload();
+        }, 1200);
+      } else {
+        cancelMsg.textContent = "❌ キャンセル失敗：" + json.message;
+      }
+
+    } catch (err) {
+      cancelMsg.textContent = "⚠ 通信エラー：" + err;
+    }
+  };
 
   /****************************************
  * 📌 予約申請（UX 版：フォームに飛ばない）

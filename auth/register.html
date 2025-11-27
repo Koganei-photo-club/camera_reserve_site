@@ -57,6 +57,16 @@
       </select>
       <br><br>
 
+      <label>役職</label><br>
+      <select id="reg-role" style="width:100%; padding:8px;">
+        <option value="0">役職なし</option>
+        <option value="1">部長</option>
+        <option value="2">副部長</option>
+        <option value="3">会計</option>
+        <option value="4">文連</option>
+      </select>
+      <br><br>
+
       <button class="button" onclick="sendRegister()">登録する</button>
     </div>
   </section>
@@ -82,7 +92,8 @@ async function sendRegister() {
     email,
     name: document.getElementById("reg-name").value.trim(),
     lineName: document.getElementById("reg-line").value.trim(),
-    grade: document.getElementById("reg-grade").value
+    grade: document.getElementById("reg-grade").value,
+    role: document.getElementById("reg-role").value
   };
 
   if (!payload.email || !payload.name || !payload.lineName) {

@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("mp-grade").textContent = user.grade;
   document.getElementById("mp-line").textContent  = user.lineName;
   document.getElementById("mp-email").textContent = user.email;
+  document.getElementById("mp-role").textContent = ["役職なし","部長","副部長","会計","文連"][user.role] ?? "ー";
 
   // ログアウトボタン
   document.getElementById("logoutBtn").onclick = () => {

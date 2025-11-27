@@ -162,11 +162,11 @@
 
 <!-- 🔁 返却日変更モーダル -->
 <div id="modifyModal" class="modal">
-  <div class="modal-content">
+  <div class="modify-box">
     <h2>返却日を変更</h2>
     <p id="modifyTarget"></p>
 
-    <label>新しい返却予定日</label>
+    <label>返却予定日</label>
     <select id="modifySelect"></select>
 
     <label>氏名</label>
@@ -177,10 +177,8 @@
 
     <p id="modifyMessage" class="message"></p>
 
-    <div class="modal-buttons">
-      <button id="modifySend">送信</button>
-      <button id="modifyClose">閉じる</button>
-    </div>
+    <button id="modifySend" class="btn-primary">変更する</button>
+    <button id="modifyClose" class="btn-secondary">閉じる</button>
   </div>
 </div>
 

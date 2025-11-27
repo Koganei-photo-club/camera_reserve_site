@@ -675,3 +675,108 @@ footer p {
 .page-transition.fade-out {
   opacity: 0;
 }
+
+/* ===============================
+   📌 モーダル共通修正版（2025-最新）
+=============================== */
+.modal,
+.day-modal,
+.cancel-modal,
+#modifyModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55); /* 濃くして視認性UP */
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 30000; /* 最前面 */
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.modal.show,
+.day-modal.show,
+.cancel-modal.show,
+#modifyModal.show {
+  display: flex;
+  opacity: 1;
+}
+
+/* 共通ボックス */
+.modal-content,
+.modal-box,
+.day-box,
+.cancel-box,
+.modify-box {
+  background: #fff; /* 白背景 */
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 380px; /* PCでも大きくなりすぎない */
+  text-align: center;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.modal.show .modal-content,
+.day-modal.show .day-box,
+.cancel-modal.show .cancel-box,
+#modifyModal.show .modify-box {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* 入力欄 */
+.modal-content input,
+.modal-content select,
+.modify-box input,
+.modify-box select {
+  width: 100%;
+  padding: 12px;
+  margin: 0.5em 0 1em;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+/* ボタン共通 */
+.modal-content button,
+.day-box button,
+.cancel-box button,
+.modify-box button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 0.6em;
+  font-size: 1.05rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  transition: 0.25s;
+}
+
+/* 汎用OKボタン */
+.btn-primary {
+  background: darkblue;
+}
+.btn-primary:hover {
+  background: navy;
+}
+
+/* キャンセルボタン */
+.btn-secondary {
+  background: #555;
+}
+.btn-secondary:hover {
+  background: #333;
+}
+
+/* エラーメッセージ */
+.modal .message,
+.modify-box .message,
+.cancel-box .message {
+  font-size: 0.9rem;
+  color: #c33;
+  min-height: 1.2rem;
+}

@@ -780,3 +780,8 @@ footer p {
   color: #c33;
   min-height: 1.2rem;
 }
+
+#profile-box {
+  background: #fff;
+  color: #333;
+}

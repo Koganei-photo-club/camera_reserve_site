@@ -28,14 +28,14 @@ async function handleCredentialResponse(response) {
     if (data.result === "register-required") {
       // 初回登録が必要
       sessionStorage.setItem("email", data.email);
-      window.location.href = "/auth/register.html";
+      window.location.href = "./auth/register.html";
       return;
     }
 
     if (data.result === "ok") {
       // 既存ユーザー → user 情報を保存してマイページへ
       sessionStorage.setItem("user", JSON.stringify(data.user));
-      window.location.href = "/mypage.html";
+      window.location.href = "./mypage.html";
       return;
     }
 

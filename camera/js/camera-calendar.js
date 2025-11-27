@@ -50,7 +50,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (r.equip !== equip) return false;
       const s = toDate(r.start);
       const e = toDate(r.end);
-      return s <= t && t <= e;
+      const ee = new Date(e);
+      ee.setDate(ee.getDate() + 1);
+      return s <= t && t < ee;
     });
   }
 
@@ -62,8 +64,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     let nearest = null;
     reservations.forEach(r => {
       if (r.equip !== equip) return;
-      const ds = toDate(r.start);
-      if (ds > s && (!nearest || ds < nearest)) nearest = ds;
+      const ee = toDate(r.end);
+      ee.setDate(ee.getDate() + 1);
+      if (ee > s && (!nearest || ee < nearest)) nearest = ee;
     });
 
     const limit = nearest ? new Date(nearest - 86400000) : max;

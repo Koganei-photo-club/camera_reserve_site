@@ -75,28 +75,36 @@ document.getElementById("reg-email").textContent =
   email ? ("メールアドレス: " + email) : "メールアドレス情報が取得できませんでした。";
 
 async function sendRegister() {
+  const email = sessionStorage.getItem("email"); // ← 取得し忘れ対応
+
   const payload = {
     mode: "register",
-    email: email,
+    email,
     name: document.getElementById("reg-name").value.trim(),
     lineName: document.getElementById("reg-line").value.trim(),
     grade: document.getElementById("reg-grade").value
   };
 
   if (!payload.email || !payload.name || !payload.lineName) {
-    alert("氏名・LINE表示名が未入力です。");
+    alert("⚠️ 入力項目が不足しています。");
     return;
   }
 
-  await fetch(USER_API, {
+  const res = await fetch(USER_API, {
     method: "POST",
-    headers: {"Content-Type":"application/json"},
+    // Content-Typeは付けない！（CORS対策）
     body: JSON.stringify(payload)
   });
 
-  alert("登録が完了しました！🎉 ログイン画面に戻ります。");
-  sessionStorage.removeItem("email");
-  window.location.href = "/index.html";
+  const data = await res.json();
+
+  if (data.result === "registered") {
+    alert("登録が完了しました！🎉 ログイン画面へ戻ります");
+    sessionStorage.removeItem("email");
+    window.location.href = "/reserve_site/auth/login.html";
+  } else {
+    alert("⚠️ 登録エラー: " + (data.message ?? "Unknown Error"));
+  }
 }
 </script>
 </body>

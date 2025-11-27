@@ -2,7 +2,7 @@
 
 // 利用者管理用 GAS Web API
 const USER_API =
-  "https://script.google.com/macros/s/AKfycbyfpetIsPVKur5FnHpqk24Lu7bJ58o8z-nmNo8aPy0mCXU849psXIgL4x36RevcbQ/exec";
+  "https://script.google.com/macros/s/AKfycbxWNWz8aIr_8DqTTHsk9y089ZLZO6B8m2ywd6e1kCWi6Fyhr4AIOcS5QwdXpHxjx8w/exec";
 
 /**
  * Google Identity Services のコールバック
@@ -14,7 +14,7 @@ async function handleCredentialResponse(response) {
 
     const res = await fetch(USER_API, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      // headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ idToken })
     });
 

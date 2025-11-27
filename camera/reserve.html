@@ -140,23 +140,23 @@
   </div>
 </div>
 
-<!-- 🔶 予約申請モーダル（UX版） -->
-<div id="applyModal" class="modal" style="display:none;">
+<!-- 📌 予約内容確認モーダル -->
+<div id="applyModal" class="modal">
   <div class="modal-box">
-    <h3>カメラ予約申請</h3>
+    <h3>予約内容確認</h3>
 
-    <p id="applyEquip"></p>
-    <p id="applyPeriod"></p>
+    <p><strong>機材：</strong><span id="applyEquip"></span></p>
+    <p><strong>期間：</strong><span id="applyPeriod"></span></p>
 
-    <input type="text" id="applyName" placeholder="氏名（フルネーム）">
-    <input type="text" id="applyLine" placeholder="LINEの名前">
+    <hr>
 
-    <div style="margin-top:1.5em;">
-      <button id="applySend" class="button">送信</button>
-      <button id="applyClose" class="button" style="background:#777;">閉じる</button>
-    </div>
+    <p><strong>利用者：</strong><span id="applyUser"></span></p>
+    <p><strong>LINE名：</strong><span id="applyUserLine"></span></p>
 
-    <p id="applyMsg" style="margin-top:1em; font-weight:bold;"></p>
+    <p id="applyMessage" style="color:green; height:1.4em;"></p>
+
+    <button id="applySend" class="button">予約する</button>
+    <button id="applyClose" class="button" style="background:#666;">閉じる</button>
   </div>
 </div>
 

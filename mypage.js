@@ -27,4 +27,41 @@ document.addEventListener("DOMContentLoaded", () => {
     sessionStorage.clear();
     window.location.href = "/reserve_site/auth/login.html";
   };
+
+  // 予約データAPI（必要に応じて書き換え）
+  const CAMERA_API = "https://camera-proxy.photo-club-at-koganei.workers.dev/";
+  // PC予約APIも後で追加予定
+
+  async function loadReservations(email) {
+    let list = document.getElementById("reserve-list");
+    list.innerHTML = "読み込み中…";
+
+    try {
+        const res = await fetch(CAMERA_API);
+        const data = await res.json();
+        const rows = data.rows || [];
+
+        const userRes = rows.filter(r => r.name === user.name);
+
+        if (userRes.length === 0) {
+            list.innerHTML = "現在アクティブな予約はありません。";
+            return;
+        }
+
+        // 表示HTML
+        list.innerHTML = userRes.map(r => `
+        <div class="reserve-item">
+            <strong>${r.equip}</strong><br>
+            ${r.start} 〜 ${r.end} <br>
+            認証コード: ${r.code}
+        </div>
+      `).join("");
+
+    } catch {
+        list.innerHTML = "予約情報を取得できませんでした。";
+    }
+  }
+
+  // DOMContentLoaded内の最後に追加
+  loadReservations(user.email);
 });

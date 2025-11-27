@@ -809,3 +809,12 @@ main.camera-center-section {
   min-height: 60vh;
   padding-top: 3em;
 }
+
+.reserve-item {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 8px;
+  text-align: left;
+}

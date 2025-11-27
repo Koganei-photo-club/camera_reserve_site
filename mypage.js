@@ -1,18 +1,27 @@
-// ▼ セッションチェック（未ログインなら拒否）
-const userData = sessionStorage.getItem("user");
-if (!userData) {
-  window.location.href = "auth/login.html";
-}
+// ======================
+// マイページ表示制御
+// ======================
+document.addEventListener("DOMContentLoaded", () => {
+  
+  // ユーザー情報の取得
+  const userJson = sessionStorage.getItem("user");
+  if (!userJson) {
+    // 未ログイン → ログインページへリダイレクト
+    window.location.href = "/reserve_site/auth/login.html";
+    return;
+  }
 
-// ▼ ユーザー情報を反映
-const user = JSON.parse(userData);
-document.getElementById("mp-name").textContent = user.name;
-document.getElementById("mp-grade").textContent = user.gradeLabel;
-document.getElementById("mp-line").textContent = user.lineName;
-document.getElementById("mp-email").textContent = user.email;
+  const user = JSON.parse(userJson);
 
-// ▼ ログアウト
-document.getElementById("logoutBtn").onclick = () => {
-  sessionStorage.clear();
-  window.location.href = "../auth/login.html";
-};
+  // DOMへ反映
+  document.getElementById("mp-name").textContent  = user.name;
+  document.getElementById("mp-grade").textContent = user.grade;
+  document.getElementById("mp-line").textContent  = user.lineName;
+  document.getElementById("mp-email").textContent = user.email;
+
+  // ログアウトボタン
+  document.getElementById("logoutBtn").onclick = () => {
+    sessionStorage.clear();
+    window.location.href = "/reserve_site/auth/login.html";
+  };
+});

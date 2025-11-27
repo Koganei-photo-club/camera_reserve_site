@@ -1,0 +1,50 @@
+<h2>初回登録</h2>
+
+<p id="reg-email"></p>
+
+<label>氏名</label><br>
+<input id="reg-name" type="text"><br><br>
+
+<label>LINE表示名</label><br>
+<input id="reg-line" type="text"><br><br>
+
+<label>学年</label><br>
+<select id="reg-grade">
+  <option value="1">B1</option>
+  <option value="2">B2</option>
+  <option value="3">B3</option>
+  <option value="4">B4</option>
+  <option value="5">M1</option>
+  <option value="6">M2</option>
+</select>
+<br><br>
+
+<button onclick="sendRegister()">登録する</button>
+
+<script>
+const USER_API = "https://script.google.com/macros/s/AKfycbzoovwcdLn6EU_CuqOUak2s9GqSfPUFBKGYfDbp_ZdAmQNzJyJDE2yHzKTSgTULV6Ip/exec";
+
+document.getElementById("reg-email").textContent =
+  "メール: " + sessionStorage.getItem("email");
+
+async function sendRegister() {
+  const payload = {
+    mode: "register",
+    email: sessionStorage.getItem("email"),
+    name: document.getElementById("reg-name").value.trim(),
+    lineName: document.getElementById("reg-line").value.trim(),
+    grade: document.getElementById("reg-grade").value
+  };
+
+  const res = await fetch(USER_API, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(payload)
+  });
+
+  alert("登録完了！🎉 ログイン画面へ戻ります");
+  sessionStorage.removeItem("email");
+  window.location.href = "/auth/login.html";
+}
+</script>
+<script src="/auth/app-auth.js"></script>

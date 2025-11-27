@@ -135,21 +135,17 @@ document.addEventListener("DOMContentLoaded", async function () {
     return arr;
   }
 
-  /***** 📌 FullCalendar イベント生成 *****/
-  const events = reservations.map(r => {
-    const e = toDate(r.end);
-    e.setDate(e.getDate() + 1); // FullCalendar の end は「翌日」
-    return {
-      title: `${r.equip} 貸出中`,
-      start: r.start,
-      end:   e.toISOString().slice(0, 10),
-      extendedProps: r,
-      backgroundColor: COLOR_MAP[r.equip] ?? "#777",
-      borderColor:     COLOR_MAP[r.equip] ?? "#777",
-      textColor: "#fff",
-      allDay:   true
-    };
-  });
+/***** 📌 FullCalendar イベント生成（修正版） *****/
+  const events = reservations.map(r => ({
+    title: `${r.equip} 貸出中`,
+    start: r.start,
+    end:   r.end, // ← 1日延長せず、そのまま！
+    extendedProps: r,
+    backgroundColor: COLOR_MAP[r.equip] ?? "#777",
+    borderColor:     COLOR_MAP[r.equip] ?? "#777",
+    textColor: "#fff",
+    allDay: true
+  }));
 
   /***** 📌 FullCalendar 描画 *****/
   const calendar = new FullCalendar.Calendar(calendarEl, {

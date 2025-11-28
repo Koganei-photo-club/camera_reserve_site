@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     const payload={
       mode:"cancel",
-      name:user.name,
+      email:user.email,
       equip,
       start,
       code:userCode

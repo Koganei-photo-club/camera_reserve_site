@@ -166,7 +166,8 @@ async function myCancelSend(equip, start, correctCode) {
   }
 
   const payload = {
-    mode: "delete",   // ←ここ!!
+    mode: "cancel",   // ←ここ!!
+    email: user.email,
     equip,
     start,
     code: correctCode

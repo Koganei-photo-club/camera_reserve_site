@@ -131,9 +131,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // 🔥 初回ロード
   loadCameraReservations();
   loadPCReservations();
-});
 
-// =============================
+  // =============================
 // マイページ用キャンセル操作
 // =============================
 
@@ -182,3 +181,5 @@ async function myCancelSend(equip, start, correctCode) {
   document.getElementById("cancelMessage").textContent = "✔ キャンセル完了！";
   setTimeout(() => location.reload(), 800);
 }
+
+});

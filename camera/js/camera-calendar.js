@@ -204,22 +204,49 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
   modal("cancelClose").onclick=()=>hide("cancelModal");
 
-  async function cancelSend(equip,start,code){
-    const userCode=modal("cancelCode").value.trim();
-    if(!userCode){
-      modal("cancelMessage").textContent="❌ コードを入力";
-      return;
-    }
-    const payload={
-      mode:"cancel",
-      email:user.email,
-      equip,
-      start,
-      code:userCode
-    };
-    await fetch(API_URL,{method:"POST", body:JSON.stringify(payload)});
-    modal("cancelMessage").textContent="✔ キャンセル完了！";
-    setTimeout(()=>location.reload(),800);
+const DEBUG = false; // 共通！
+
+async function cancelSend(equip, start, code) {
+  const userCode = modal("cancelCode").value.trim();
+  if (!userCode) {
+    modal("cancelMessage").textContent = "❌ コードを入力";
+    return;
   }
+  if (userCode !== code) {
+    modal("cancelMessage").textContent = "❌ コードが違います";
+    return;
+  }
+
+  const payload = {
+    mode: "cancel",
+    email: user.email,
+    equip,
+    start,
+    code
+  };
+
+  if (DEBUG) console.log("🔥Send cancel payload:", payload);
+
+  modal("cancelMessage").textContent = DEBUG
+    ? "⏳送信中…（デバッグログ確認）"
+    : "⏳キャンセル申請中…";
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  const result = await res.json().catch(() => null);
+
+  if (DEBUG) {
+    console.log("📥Cancel response:", result);
+    modal("cancelMessage").textContent =
+      "✔ 完了（デバッグ：削除結果はログ）";
+  } else {
+    modal("cancelMessage").textContent = "✔ 完了！";
+    setTimeout(() => location.reload(), 800);
+  }
+}
 
 });

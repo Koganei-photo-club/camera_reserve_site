@@ -64,6 +64,49 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+
+  // 🔹PC予約API
+  const PC_API = "https://pc-proxy.photo-club-at-koganei.workers.dev/";
+
+  async function loadPCReservations() {
+    const list = document.getElementById("pc-reserve-list");
+    if (!list) return;
+
+    list.innerHTML = "読み込み中…";
+
+    try {
+      const res = await fetch(PC_API);
+      const data = await res.json();
+      const rows = data.rows || [];
+
+      const myRes = rows.filter(r => r.name === user.name);
+
+      if (myRes.length === 0) {
+        list.innerHTML = `<div class="reserve-item">PC の予約はありません</div>`;
+        return;
+      }
+
+      list.innerHTML = `
+        <table class="reserve-table">
+          <tr><th>PC</th><th>期間</th><th>認証コード</th></tr>
+          ${myRes.map(r => `
+            <tr>
+              <td>${r.equip || "PC"}</td>
+              <td>${r.start}〜${r.end}</td>
+              <td>${r.code}</td>
+            </tr>
+          `).join("")}
+        </table>
+      `;
+
+    } catch (err) {
+      console.error(err);
+      list.innerHTML = "予約情報取得失敗…";
+    }
+  }
+
+
   // 🔥 初回ロード
   loadCameraReservations();
+  loadPCReservations();
 });

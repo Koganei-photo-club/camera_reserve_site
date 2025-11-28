@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <td>${r.start}〜${r.end}</td>
               <td>${r.code}</td>
               <td>
-                <button class="cancel-btn" onclick="openMyCancelModal('${r.equip}', '${r.start}', '${r.code}')">
+                <button class="cancel-btn" data-equip="${r.equip}" data-start="${r.start}" data-code="${r.code}">
                   取り消し
                 </button>
               </td>
@@ -65,6 +65,16 @@ document.addEventListener("DOMContentLoaded", () => {
           `).join("")}
         </table>
       `;
+
+      document.querySelectorAll(".cancel-btn").forEach(btn => {
+        btn.onclick = () => {
+          openMyCancelModal(
+          btn.dataset.equip,
+          btn.dataset.start,
+          btn.dataset.code
+        );
+      };
+    });
 
     } catch (err) {
       console.error(err);

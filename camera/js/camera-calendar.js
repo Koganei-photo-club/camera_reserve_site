@@ -179,22 +179,26 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   modal("applyClose").onclick=()=>hide("applyModal");
 
-  modal("applySend").onclick=async()=>{
-    const payload={
-      mode:"reserve",
-      name:user.name,
-      lineName:user.lineName,
-      equip:APPLY_EQUIP,
-      start:APPLY_START,
-      end:APPLY_END
-    };
-    await fetch(API_URL,{
-      method:"POST",
-      body:JSON.stringify(payload)
-    });
-    modal("applyMessage").textContent="✔ 予約完了！";
-    setTimeout(()=>location.reload(), 800);
+modal("applySend").onclick = async () => {
+  const payload = {
+    mode: "reserve",
+    email: user.email,     // ← 追加！
+    name: user.name,
+    lineName: user.lineName,
+    equip: APPLY_EQUIP,
+    start: APPLY_START,
+    end: APPLY_END
   };
+
+  await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }, // 追加推奨
+    body: JSON.stringify(payload)
+  });
+
+  modal("applyMessage").textContent = "✔ 予約完了！";
+  setTimeout(() => location.reload(), 800);
+};
 
   function openCancelModal(equip,start,code){
     modal("cancelTarget").textContent=`${equip} / ${start}`

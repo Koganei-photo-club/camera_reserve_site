@@ -189,7 +189,7 @@ async function myCancelSend(equip, start, correctCode) {
   });
 
   document.getElementById("cancelMessage").textContent = "✔ キャンセル完了！";
-  // setTimeout(() => location.reload(), 800);
+  setTimeout(() => location.reload(), 800);
 }
 
 });

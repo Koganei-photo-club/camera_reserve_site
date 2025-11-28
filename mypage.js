@@ -67,14 +67,14 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
 
       document.querySelectorAll(".cancel-btn").forEach(btn => {
-        btn.onclick = () => {
-          openMyCancelModal(
-          btn.dataset.equip,
-          btn.dataset.start,
-          btn.dataset.code
-        );
-      };
-    });
+  btn.addEventListener("click", () => {
+    openMyCancelModal(
+      btn.dataset.equip,
+      btn.dataset.start,
+      btn.dataset.code
+    );
+  });
+});
 
     } catch (err) {
       console.error(err);
@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <td>${r.start}〜${r.end}</td>
               <td>${r.code}</td>
               <td>
-                <button class="cancel-btn" onclick="openMyCancelModal('${r.equip}', '${r.start}', '${r.code}')">
+                <button class="cancel-btn" data-equip="${r.equip}" data-start="${r.start}" data-code="${r.code}">
                   取り消し
                 </button>
               </td>
@@ -121,6 +121,16 @@ document.addEventListener("DOMContentLoaded", () => {
           `).join("")}
         </table>
       `;
+
+      document.querySelectorAll(".cancel-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    openMyCancelModal(
+      btn.dataset.equip,
+      btn.dataset.start,
+      btn.dataset.code
+    );
+  });
+});
 
     } catch (err) {
       console.error(err);
@@ -142,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadCameraReservations();
   loadPCReservations();
 
-  // =============================
+// =============================
 // マイページ用キャンセル操作
 // =============================
 
@@ -174,6 +184,8 @@ async function myCancelSend(equip, start, correctCode) {
     return;
   }
 
+  const targetAPI = equip.includes("PC") ? PC_API : CAMERA_API;
+
   const payload = {
     mode: "cancel",   // ←ここ!!
     email: user.email,
@@ -182,7 +194,7 @@ async function myCancelSend(equip, start, correctCode) {
     code: correctCode
   };
 
-  await fetch(CAMERA_API, {
+  await fetch(targetAPI, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify(payload)

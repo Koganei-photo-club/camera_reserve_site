@@ -172,37 +172,7 @@ function openMyCancelModal(equip, start, code) {
     myCancelSend(equip, start, code);
 }
 
-// async function myCancelSend(equip, start, correctCode) {
-
-//   const input = document.getElementById("cancelCode").value.trim();
-//   if (!input) {
-//     document.getElementById("cancelMessage").textContent = "❌ コードを入力";
-//     return;
-//   }
-//   if (input !== correctCode) {
-//     document.getElementById("cancelMessage").textContent = "❌ コードが違います";
-//     return;
-//   }
-
-//   const targetAPI = equip.includes("PC") ? PC_API : CAMERA_API;
-
-//   const payload = {
-//     mode: "cancel",   // ←ここ!!
-//     email: user.email,
-//     equip,
-//     start,
-//     code: correctCode
-//   };
-
-//   await fetch(targetAPI, {
-//     method: "POST",
-//     headers: {"Content-Type": "application/json"},
-//     body: JSON.stringify(payload)
-//   });
-
-//   document.getElementById("cancelMessage").textContent = "✔ キャンセル完了！";
-//   setTimeout(() => location.reload(), 800);
-// }
+const DEBUG_MODE = false; // ← ここだけ切り替える！
 
 async function myCancelSend(equip, start, correctCode) {
 
@@ -226,9 +196,10 @@ async function myCancelSend(equip, start, correctCode) {
     code: correctCode
   };
 
-  console.log("🔥Send cancel payload:", payload);
-
-  document.getElementById("cancelMessage").textContent = "⏳キャンセル申請送信中…（ログ確認してね）";
+  if (DEBUG_MODE) {
+    console.log("🔥Send cancel payload:", payload);
+    document.getElementById("cancelMessage").textContent = "⏳通信中…";
+  }
 
   const res = await fetch(targetAPI, {
     method: "POST",
@@ -236,12 +207,14 @@ async function myCancelSend(equip, start, correctCode) {
     body: JSON.stringify(payload)
   });
 
-  const result = await res.json();
-  console.log("📥Cancel response:", result);
-
-  // 🔥 リロードしない（画面に表示）
-  document.getElementById("cancelMessage").textContent =
-    "✔ 完了（デバッグ中：削除成功したかコンソール見て！）";
+  if (DEBUG_MODE) {
+    const result = await res.json().catch(()=>null);
+    console.log("📥Cancel response:", result);
+    document.getElementById("cancelMessage").textContent = "✔ 完了（デバッグ中）";
+  } else {
+    document.getElementById("cancelMessage").textContent = "✔ キャンセル完了！";
+    setTimeout(() => location.reload(), 800);
+  }
 }
 
 });

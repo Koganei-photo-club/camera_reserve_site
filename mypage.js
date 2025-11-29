@@ -2,7 +2,7 @@
 // マイページ表示制御
 // ======================
 const CAMERA_API = "https://camera-proxy.photo-club-at-koganei.workers.dev/";
-const PC_API     = "https://pc-proxy.photo-club-at-koganei.workers.dev()";
+const PC_API     = "https://pc-proxy.photo-club-at-koganei.workers.dev/";
 
 const DEBUG_MODE = true;   // ← ログを見たい間は true、本番運用時は false
 

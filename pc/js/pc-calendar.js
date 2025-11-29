@@ -327,46 +327,60 @@ document.addEventListener("DOMContentLoaded", async function () {
     cancelModal.style.display = "flex";
   }
 
-  cancelConfirm.addEventListener("click", async () => {
-    if (!user) {
-      cancelMessage.textContent = "⚠ ログインしていません。";
-      return;
-    }
+const DEBUG = true; // ←切り替えスイッチ！（trueでデバッグ表示）
 
-    const code = document.getElementById("cancelCode").value.trim();
-    if (!code) {
-      cancelMessage.textContent = "⚠ 認証コードを入力してください。";
-      return;
-    }
+cancelConfirm.addEventListener("click", async () => {
+  if (!user) {
+    cancelMessage.textContent = "⚠ ログインしていません。";
+    return;
+  }
 
-    const payload = {
-      mode: "cancel",
-      email: user.email,
-      equip: cancelSlot,
-      start: cancelDate,
-      code
-    };
+  const code = document.getElementById("cancelCode").value.trim();
+  if (!code) {
+    cancelMessage.textContent = "⚠ 認証コードを入力してください。";
+    return;
+  }
 
-    try {
-      const res = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const result = await res.json();
+  const payload = {
+    mode: "cancel",
+    email: user.email,
+    equip: cancelSlot,
+    start: cancelDate,
+    code
+  };
 
+  if (DEBUG) console.log("🔥Send cancel payload:", payload);
+
+  cancelMessage.textContent = DEBUG
+    ? "⏳送信中…（デバッグ: 結果はログ表示）"
+    : "⏳キャンセル申請中…";
+
+  try {
+    const res = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await res.json().catch(() => null);
+
+    if (DEBUG) {
+      console.log("📥Cancel response:", result);
+      cancelMessage.textContent = "✔ 完了（ログで結果確認）";
+    } else {
       if (result.result === "success") {
-        cancelMessage.textContent = "キャンセルが完了しました。";
+        cancelMessage.textContent = "✔ キャンセル完了！";
         setTimeout(() => window.location.reload(), 1500);
       } else {
-        cancelMessage.textContent = "一致する予約が見つかりません。";
+        cancelMessage.textContent = "⚠ 一致する予約が見つかりません";
       }
-
-    } catch (err) {
-      console.error(err);
-      cancelMessage.textContent = "⚠ 通信エラーが発生しました。";
     }
-  });
+
+  } catch (err) {
+    console.error(err);
+    cancelMessage.textContent = "⚠ 通信エラー";
+  }
+});
 
 });
 

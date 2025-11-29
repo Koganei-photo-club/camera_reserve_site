@@ -101,7 +101,13 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const res  = await fetch(PC_API);
       const data = await res.json();
-      const rows = data.rows || [];
+      const rows = (data.rows || []).map(r => ({
+        email: r.email,
+        name:  r.name,
+        slot:  r.equip,
+        date:  r.start,
+        auth:  r.code
+      }));
 
       // PC 側は email で紐付け
       const myRes = rows.filter(r => r.email === user.email);

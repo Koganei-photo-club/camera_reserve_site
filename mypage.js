@@ -2,17 +2,20 @@
 // マイページ表示制御
 // ======================
 const CAMERA_API = "https://camera-proxy.photo-club-at-koganei.workers.dev/";
-const PC_API = "https://pc-proxy.photo-club-at-koganei.workers.dev/";
+const PC_API     = "https://pc-proxy.photo-club-at-koganei.workers.dev()";
+
+const DEBUG_MODE = true;   // ← ログを見たい間は true、本番運用時は false
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // ユーザー情報の取得
+  // ----------------------
+  // ログインユーザー取得
+  // ----------------------
   const userJson = sessionStorage.getItem("user");
   if (!userJson) {
     window.location.href = "/reserve_site/auth/login.html";
     return;
   }
-
   const user = JSON.parse(userJson);
 
   const gradeNames = ["","B1","B2","B3","B4","M1","M2"];
@@ -29,35 +32,38 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "/reserve_site/auth/login.html";
   };
 
-  // 🔹カメラ予約API
-  // const CAMERA_API = "https://camera-proxy.photo-club-at-koganei.workers.dev/";
-
+  // =========================
+  // 🔹 カメラ予約一覧の読み込み
+  // =========================
   async function loadCameraReservations() {
     const list = document.getElementById("reserve-list");
     list.innerHTML = "読み込み中…";
 
     try {
-      const res = await fetch(CAMERA_API);
+      const res  = await fetch(CAMERA_API);
       const data = await res.json();
       const rows = data.rows || [];
 
       const myRes = rows.filter(r => r.name === user.name);
 
       if (myRes.length === 0) {
-        list.innerHTML = `<div class="reserve-item">予約はありません</div>`;
+        list.innerHTML = `<div class="reserve-item">カメラの予約はありません</div>`;
         return;
       }
 
       list.innerHTML = `
         <table class="reserve-table">
-          <tr><th>機材</th><th>期間</th><th>認証コード</th></tr>
+          <tr><th>機材</th><th>期間</th><th>認証コード</th><th></th></tr>
           ${myRes.map(r => `
             <tr>
               <td>${r.equip}</td>
               <td>${r.start}〜${r.end}</td>
               <td>${r.code}</td>
               <td>
-                <button class="cancel-btn" data-equip="${r.equip}" data-start="${r.start}" data-code="${r.code}">
+                <button class="cancel-btn"
+                  data-equip="${r.equip}"
+                  data-start="${r.start}"
+                  data-code="${r.code}">
                   取り消し
                 </button>
               </td>
@@ -66,15 +72,16 @@ document.addEventListener("DOMContentLoaded", () => {
         </table>
       `;
 
-      document.querySelectorAll(".cancel-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    openMyCancelModal(
-      btn.dataset.equip,
-      btn.dataset.start,
-      btn.dataset.code
-    );
-  });
-});
+      // このリストの中のボタンだけにイベントを付与
+      list.querySelectorAll(".cancel-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          openMyCancelModal(
+            btn.dataset.equip,   // equip
+            btn.dataset.start,   // start
+            btn.dataset.code     // code
+          );
+        });
+      });
 
     } catch (err) {
       console.error(err);
@@ -82,65 +89,70 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // =========================
+  // 🔹 PC予約一覧の読み込み
+  // =========================
+  async function loadPCReservations() {
+    const list = document.getElementById("pc-reserve-list");
+    if (!list) return;
 
-// 🔹PC予約API
-async function loadPCReservations() {
-  const list = document.getElementById("pc-reserve-list");
-  if (!list) return;
+    list.innerHTML = "読み込み中…";
 
-  list.innerHTML = "読み込み中…";
+    try {
+      const res  = await fetch(PC_API);
+      const data = await res.json();
+      const rows = data.rows || [];
 
-  try {
-    const res = await fetch(PC_API);
-    const data = await res.json();
-    const rows = data.rows || [];
+      // PC 側は email で紐付け
+      const myRes = rows.filter(r => r.email === user.email);
 
-    // 📌 email一致でフィルタ
-    const myRes = rows.filter(r => r.email === user.email);
+      if (myRes.length === 0) {
+        list.innerHTML = `<div class="reserve-item">PC の予約はありません</div>`;
+        return;
+      }
 
-    if (myRes.length === 0) {
-      list.innerHTML = `<div class="reserve-item">PC の予約はありません</div>`;
-      return;
-    }
+      list.innerHTML = `
+        <table class="reserve-table">
+          <tr><th>予約日</th><th>枠</th><th>認証コード</th><th></th></tr>
+          ${myRes.map(r => `
+            <tr>
+              <td>${r.date || "?"}</td>
+              <td>${r.slot || "?"}</td>
+              <td>${r.auth || "?"}</td>
+              <td>
+                <button class="cancel-btn"
+                  data-slot="${r.slot}"
+                  data-date="${r.date}"
+                  data-code="${r.auth}">
+                  取り消し
+                </button>
+              </td>
+            </tr>
+          `).join("")}
+        </table>
+      `;
 
-    list.innerHTML = `
-      <table class="reserve-table">
-        <tr><th>予約日</th><th>枠</th><th>認証コード</th><th></th></tr>
-        ${myRes.map(r => `
-          <tr>
-            <td>${r.date || "?"}</td>
-            <td>${r.slot || "?"}</td>
-            <td>${r.auth || "?"}</td>
-            <td>
-              <button class="cancel-btn"
-                data-date="${r.date}"
-                data-slot="${r.slot}"
-                data-code="${r.auth}">
-                取り消し
-              </button>
-            </td>
-          </tr>
-        `).join("")}
-      </table>
-    `;
-
-    // ボタンクリック登録
-    document.querySelectorAll(".cancel-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        openMyCancelModal(
-          btn.dataset.slot,  // ← PCではslotをequip扱い
-          btn.dataset.date,
-          btn.dataset.code
-        );
+      // PC リスト内のボタンだけにイベントを付与
+      list.querySelectorAll(".cancel-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          // PC のときは slot を equip として渡し、date を start 扱いにする
+          openMyCancelModal(
+            btn.dataset.slot,   // equip (実際は時刻枠)
+            btn.dataset.date,   // startOrDate
+            btn.dataset.code    // code
+          );
+        });
       });
-    });
 
-  } catch (err) {
-    console.error(err);
-    list.innerHTML = "予約情報取得失敗…";
+    } catch (err) {
+      console.error(err);
+      list.innerHTML = "予約情報取得失敗…";
+    }
   }
-}
 
+  // =========================
+  // 🔹 キャンセルモーダルの「閉じる」
+  // =========================
   const cancelCloseBtn = document.getElementById("cancelClose");
   if (cancelCloseBtn) {
     cancelCloseBtn.onclick = () => {
@@ -150,92 +162,97 @@ async function loadPCReservations() {
     };
   }
 
-
+  // =========================
   // 🔥 初回ロード
+  // =========================
   loadCameraReservations();
   loadPCReservations();
 
-// =============================
-// マイページ用キャンセル操作
-// =============================
+  // =============================
+  // マイページ用キャンセル操作
+  // =============================
 
-// 既存のキャンセルモーダルを利用
-function openMyCancelModal(equip, start, code) {
-  const m = document.getElementById("cancelModal");
+  // 既存キャンセルモーダルを利用
+  function openMyCancelModal(equip, startOrDate, code) {
+    const m = document.getElementById("cancelModal");
 
-  document.getElementById("cancelTarget").textContent =
-    `${equip} / ${start}`;
-  document.getElementById("cancelMessage").textContent = "";
+    document.getElementById("cancelTarget").textContent =
+      `${equip} / ${startOrDate}`;
+    document.getElementById("cancelMessage").textContent = "";
+    document.getElementById("cancelCode").value = "";
 
-  // 表示＋ふわっと出るアニメーション
-  m.style.display = "flex";
-  setTimeout(() => m.classList.add("show"), 10);
+    // 表示＋ふわっと
+    m.style.display = "flex";
+    setTimeout(() => m.classList.add("show"), 10);
 
-  document.getElementById("cancelSend").onclick = () =>
-    myCancelSend(equip, start, code);
-}
-
-const DEBUG_MODE = true; // ← ここだけ切り替える！
-
-async function myCancelSend(equip, startOrDate, correctCode) {
-
-  const input = document.getElementById("cancelCode").value.trim();
-  if (!input) {
-    document.getElementById("cancelMessage").textContent = "❌ コードを入力";
-    return;
-  }
-  if (input !== correctCode) {
-    document.getElementById("cancelMessage").textContent = "❌ コードが違います";
-    return;
+    document.getElementById("cancelSend").onclick = () =>
+      myCancelSend(equip, startOrDate, code);
   }
 
-  let targetAPI;
-  let payload;
+  async function myCancelSend(equip, startOrDate, correctCode) {
 
-  // 🔹PC判定（equip が時刻枠なら PC予約）
-  const isPC = equip.includes("〜");
+    const input = document.getElementById("cancelCode").value.trim();
+    if (!input) {
+      document.getElementById("cancelMessage").textContent = "❌ コードを入力";
+      return;
+    }
+    if (input !== correctCode) {
+      document.getElementById("cancelMessage").textContent = "❌ コードが違います";
+      return;
+    }
 
-  if (isPC) {
-    targetAPI = PC_API;
-    payload = {
-      requestType: "PCキャンセル",
-      date: startOrDate,
-      slot: equip,
-      auth: correctCode,
-      name: user.name
-    };
-  } else {
-    targetAPI = CAMERA_API;
-    payload = {
-      mode: "cancel",
-      email: user.email,
-      equip,
-      start: startOrDate,
-      code: correctCode
-    };
+    let targetAPI;
+    let payload;
+
+    // =========================
+    // PC or カメラ の判定
+    // （時刻枠「〜」を含むかどうかで判定）
+    // =========================
+    const isPC = equip.includes("〜");
+
+    if (isPC) {
+      // PCキャンセル
+      targetAPI = PC_API;
+      payload = {
+        requestType: "PCキャンセル",
+        date: startOrDate,   // 予約日
+        slot: equip,        // 枠（10:50〜11:40 など）
+        auth: correctCode,
+        name: user.name
+      };
+    } else {
+      // カメラキャンセル（既存仕様）
+      targetAPI = CAMERA_API;
+      payload = {
+        mode: "cancel",
+        email: user.email,
+        equip,
+        start: startOrDate,
+        code: correctCode
+      };
+    }
+
+    if (DEBUG_MODE) {
+      console.log("🔥Send cancel payload:", payload);
+      document.getElementById("cancelMessage").textContent = "⏳通信中…";
+    }
+
+    const res = await fetch(targetAPI, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(payload)
+    });
+
+    if (DEBUG_MODE) {
+      const result = await res.json().catch(() => null);
+      console.log("📥Cancel response:", result);
+      document.getElementById("cancelMessage").textContent =
+        "✔ 完了（デバッグ中：結果はコンソールへ）";
+      return;
+    }
+
+    document.getElementById("cancelMessage").textContent = "✔ キャンセル完了！";
+    setTimeout(() => location.reload(), 800);
   }
 
-  if (DEBUG_MODE) {
-    console.log("🔥Send cancel payload:", payload);
-    document.getElementById("cancelMessage").textContent = "⏳通信中…";
-  }
-
-  const res = await fetch(targetAPI, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(payload)
-  });
-
-  if (DEBUG_MODE) {
-    const result = await res.json().catch(()=>null);
-    console.log("📥Cancel response:", result);
-    document.getElementById("cancelMessage").textContent =
-      "✔ 完了（デバッグ中）";
-    return;
-  }
-
-  document.getElementById("cancelMessage").textContent = "✔ キャンセル完了！";
-  setTimeout(() => location.reload(), 800);
-}
-
-});
+});  // DOMContentLoaded end

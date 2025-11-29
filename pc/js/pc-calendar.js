@@ -1,11 +1,31 @@
 /**********************************************
- * PC予約カレンダー 完全安定版（2025-11）
+ * 💻 PC予約カレンダー（フォームに飛ばない版）
+ *  - 予約一覧取得: PC_API (GET) → {status, rows}
+ *  - 予約登録   : PC_API (POST, mode:"reserve")
+ *  - 予約取消   : PC_API (POST, mode:"cancel")
+ *
+ *  rows の形:
+ *   {
+ *     email, name, lineName,
+ *     equip: "10:50〜11:40",    // 時間枠
+ *     start: "2025-12-09",      // 予約日
+ *     end:   "2025-12-09",
+ *     code:  "1234"
+ *   }
  **********************************************/
 
 document.addEventListener("DOMContentLoaded", async function () {
 
   const calendarEl = document.getElementById("calendar");
   const apiUrl = "https://pc-proxy.photo-club-at-koganei.workers.dev/";
+
+  // ログインユーザー情報（カメラと同じセッション）
+  const userJson = sessionStorage.getItem("user");
+  const user = userJson ? JSON.parse(userJson) : null;
+
+  if (!user) {
+    alert("⚠ PC予約を行うにはログインが必要です。（閲覧のみ可能）");
+  }
 
   const TIME_SLOTS = [
     "10:50〜11:40", "11:40〜12:30",
@@ -18,17 +38,22 @@ document.addEventListener("DOMContentLoaded", async function () {
   // PC予約：JSTで前日締切
   // ===============================
   function isPcSlotAvailable(dateStr) {
+    // 今日の JST YYYY-MM-DD を作成
     const now = new Date();
     const jstOffsetMs = 9 * 60 * 60 * 1000;
     const todayJst = new Date(now.getTime() + jstOffsetMs);
     const todayStr = todayJst.toISOString().split("T")[0];
+
+    // 今日の JST 00:00
     const today0 = new Date(`${todayStr}T00:00:00+09:00`);
+
+    // 対象日を JST 00:00 に固定
     const target = new Date(`${dateStr}T00:00:00+09:00`);
 
+    // 今日より未来の日付だけ予約可能
     return target > today0;
   }
 
-  // ← ここは「配列」にしておく
   let rawData = [];
 
   /************************************************
@@ -36,13 +61,9 @@ document.addEventListener("DOMContentLoaded", async function () {
    ************************************************/
   try {
     const res = await fetch(apiUrl);
-    const raw = await res.json();              // 👈 まずオブジェクトを受け取る
-
-    console.log("PC予約レスポンス:", raw);    // デバッグ用
-
-    // 👇 rows が配列ならそれを rawData に入れる
-    rawData = Array.isArray(raw.rows) ? raw.rows : [];
-
+    const data = await res.json();
+    // GAS が { status, rows } を返している想定
+    rawData = Array.isArray(data.rows) ? data.rows : (Array.isArray(data) ? data : []);
   } catch (err) {
     console.error("予約データ取得エラー:", err);
     return;
@@ -52,9 +73,9 @@ document.addEventListener("DOMContentLoaded", async function () {
    * 日付別の予約カウント
    ************************************************/
   const countByDate = {};
-  rawData.forEach(r => {              // 👈 ここでやっと配列として使える
-    if (!r.date) return;
-    const date = String(r.date).replace(/\//g, "-");
+  rawData.forEach(r => {
+    const date = r.start;  // PCでは start = 予約日
+    if (!date) return;
     if (!countByDate[date]) countByDate[date] = 0;
     countByDate[date]++;
   });
@@ -82,10 +103,12 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   calendar.render();
 
+
   /************************************************
    * 日セルの色付け（関数化）
    ************************************************/
   function paintCell(info, calendarInstance) {
+
     const cellDate = info.date;
     const dispMonth = info.view.currentStart.getMonth();
     const dispYear  = info.view.currentStart.getFullYear();
@@ -136,14 +159,17 @@ document.addEventListener("DOMContentLoaded", async function () {
    * 月が確定した後に全日セルを再塗り
    ************************************************/
   function fixMonthPaint(calendarInstance, countMap) {
+
     const view = calendarInstance.view;
     const start = new Date(view.currentStart);
     const end   = new Date(view.currentEnd);
     const mid = new Date((start.getTime() + end.getTime()) / 2);
+
     const dispMonth = mid.getMonth();
     const dispYear  = mid.getFullYear();
 
     document.querySelectorAll(".fc-daygrid-day").forEach(cell => {
+
       const dateStr = cell.getAttribute("data-date");
       if (!dateStr) return;
 
@@ -194,10 +220,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   /************************************************
    * 日別モーダル
    ************************************************/
-  const dayModal   = document.getElementById("dayModal");
-  const dayTitle   = document.getElementById("dayTitle");
-  const timeSlotsEl= document.getElementById("timeSlots");
-  const dayClose   = document.getElementById("dayClose");
+  const dayModal = document.getElementById("dayModal");
+  const dayTitle = document.getElementById("dayTitle");
+  const timeSlotsEl = document.getElementById("timeSlots");
+  const dayClose = document.getElementById("dayClose");
 
   dayClose.addEventListener("click", () => {
     dayModal.style.display = "none";
@@ -206,12 +232,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   function openDayModal(date) {
     dayTitle.textContent = `${date} の予約状況`;
 
-    const todaysData = rawData.filter(r => String(r.date).replace(/\//g,"-") === date);
+    const todaysData = rawData.filter(r => r.start === date);
     timeSlotsEl.innerHTML = "";
 
     TIME_SLOTS.forEach(slot => {
-      const reserved  = todaysData.some(r => r.slot === slot);
+      const reserved = todaysData.some(r => r.equip === slot);
       const available = isPcSlotAvailable(date);
+
       const btn = document.createElement("button");
 
       if (!available) {
@@ -239,34 +266,55 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   /************************************************
-   * Googleフォームへ飛ぶ
+   * 予約（Googleフォームに飛ばさず、直接API）
    ************************************************/
-  function openReserveConfirm(date, slot) {
+  async function openReserveConfirm(date, slot) {
+    if (!user) {
+      alert("⚠ ログインユーザーのみ予約できます");
+      return;
+    }
+
     const ok = confirm(`${date} / ${slot}\nこの枠を予約しますか？`);
     if (!ok) return;
 
-    const url =
-      `https://docs.google.com/forms/d/e/1FAIpQLSc_03SmPQFbq-BtfRg-BaWW_DxTkARgwdgMReH_ExbQKx6rtQ/viewform?usp=pp_url`
-      + `&entry.1916762579=${encodeURIComponent(date)}`
-      + `&entry.780927556=${encodeURIComponent(slot)}`;
+    const payload = {
+      mode: "reserve",
+      email: user.email,
+      name: user.name,
+      lineName: user.lineName,
+      equip: slot,  // 時間枠
+      start: date,  // 予約日
+      end: date
+    };
 
-    window.open(url, "_blank");
-
-    setTimeout(() => {
+    try {
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const result = await res.json();
+      alert("予約が完了しました！（認証コード: " + (result.code || "----") + "）");
       window.location.reload();
-    }, 1000);
+
+    } catch (err) {
+      console.error(err);
+      alert("予約送信でエラーが発生しました。");
+    }
   }
 
   /************************************************
    * キャンセル申請
    ************************************************/
-  const cancelModal   = document.getElementById("cancelModal");
-  const cancelTarget  = document.getElementById("cancelTarget");
-  const cancelClose   = document.getElementById("cancelClose");
+  const cancelModal = document.getElementById("cancelModal");
+  const cancelTarget = document.getElementById("cancelTarget");
+  const cancelClose = document.getElementById("cancelClose");
   const cancelConfirm = document.getElementById("cancelConfirm");
   const cancelMessage = document.getElementById("cancelMessage");
 
-  cancelClose.addEventListener("click", () => cancelModal.style.display = "none");
+  cancelClose.addEventListener("click", () => {
+    cancelModal.style.display = "none";
+  });
 
   let cancelDate = "";
   let cancelSlot = "";
@@ -280,20 +328,23 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   cancelConfirm.addEventListener("click", async () => {
-    const name = document.getElementById("cancelName").value.trim();
-    const code = document.getElementById("cancelCode").value.trim();
+    if (!user) {
+      cancelMessage.textContent = "⚠ ログインしていません。";
+      return;
+    }
 
-    if (!name || !code) {
-      cancelMessage.textContent = "⚠️ 氏名と認証コードを入力してください。";
+    const code = document.getElementById("cancelCode").value.trim();
+    if (!code) {
+      cancelMessage.textContent = "⚠ 認証コードを入力してください。";
       return;
     }
 
     const payload = {
-      requestType: "PCキャンセル",
-      date: cancelDate,
-      slot: cancelSlot,
-      name: name,
-      auth: code
+      mode: "cancel",
+      email: user.email,
+      equip: cancelSlot,
+      start: cancelDate,
+      code
     };
 
     try {
@@ -304,15 +355,16 @@ document.addEventListener("DOMContentLoaded", async function () {
       });
       const result = await res.json();
 
-      cancelMessage.textContent = result.message;
-
-      if (result.status === "success") {
-        setTimeout(() => location.reload(), 1500);
+      if (result.result === "success") {
+        cancelMessage.textContent = "キャンセルが完了しました。";
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        cancelMessage.textContent = "一致する予約が見つかりません。";
       }
 
     } catch (err) {
       console.error(err);
-      cancelMessage.textContent = "⚠️ 通信エラーが発生しました。";
+      cancelMessage.textContent = "⚠ 通信エラーが発生しました。";
     }
   });
 
@@ -328,6 +380,7 @@ document.querySelectorAll("a").forEach(a => {
   a.addEventListener("click", (e) => {
     e.preventDefault();
     const url = href;
+
     document.body.classList.add("fade-in");
     document.body.classList.add("fade-out");
 

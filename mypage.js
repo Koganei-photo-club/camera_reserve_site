@@ -108,14 +108,14 @@ async function loadPCReservations() {
         <tr><th>予約日</th><th>枠</th><th>認証コード</th><th></th></tr>
         ${myRes.map(r => `
           <tr>
-            <td>${r.date}</td>
-            <td>${r.slot}</td>
-            <td>${r.auth}</td>
+            <td>${r.date || "?"}</td>
+            <td>${r.slot || "?"}</td>
+            <td>${r.auth || "?"}</td>
             <td>
               <button class="cancel-btn"
                 data-date="${r.date}"
                 data-slot="${r.slot}"
-                data-auth="${r.auth}">
+                data-code="${r.auth}">
                 取り消し
               </button>
             </td>
@@ -128,9 +128,9 @@ async function loadPCReservations() {
     document.querySelectorAll(".cancel-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         openMyCancelModal(
-          btn.dataset.slot,  // PCはslotをequipの代わりに使用
+          btn.dataset.slot,  // ← PCではslotをequip扱い
           btn.dataset.date,
-          btn.dataset.auth
+          btn.dataset.code
         );
       });
     });

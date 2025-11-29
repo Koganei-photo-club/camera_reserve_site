@@ -83,60 +83,63 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  // 🔹PC予約API
-  // const PC_API = "https://pc-proxy.photo-club-at-koganei.workers.dev/";
+// 🔹PC予約API
+async function loadPCReservations() {
+  const list = document.getElementById("pc-reserve-list");
+  if (!list) return;
 
-  async function loadPCReservations() {
-    const list = document.getElementById("pc-reserve-list");
-    if (!list) return;
+  list.innerHTML = "読み込み中…";
 
-    list.innerHTML = "読み込み中…";
+  try {
+    const res = await fetch(PC_API);
+    const data = await res.json();
+    const rows = data.rows || [];
 
-    try {
-      const res = await fetch(PC_API);
-      const data = await res.json();
-      const rows = data.rows || [];
+    // 📌 email一致でフィルタ
+    const myRes = rows.filter(r => r.email === user.email);
 
-      const myRes = rows.filter(r => r.name === user.name);
-
-      if (myRes.length === 0) {
-        list.innerHTML = `<div class="reserve-item">PC の予約はありません</div>`;
-        return;
-      }
-
-      list.innerHTML = `
-        <table class="reserve-table">
-          <tr><th>PC</th><th>期間</th><th>認証コード</th></tr>
-          ${myRes.map(r => `
-            <tr>
-              <td>${r.equip || "PC"}</td>
-              <td>${r.start}〜${r.end}</td>
-              <td>${r.code}</td>
-              <td>
-                <button class="cancel-btn" data-equip="${r.equip}" data-start="${r.start}" data-code="${r.code}">
-                  取り消し
-                </button>
-              </td>
-            </tr>
-          `).join("")}
-        </table>
-      `;
-
-      document.querySelectorAll(".cancel-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    openMyCancelModal(
-      btn.dataset.equip,
-      btn.dataset.start,
-      btn.dataset.code
-    );
-  });
-});
-
-    } catch (err) {
-      console.error(err);
-      list.innerHTML = "予約情報取得失敗…";
+    if (myRes.length === 0) {
+      list.innerHTML = `<div class="reserve-item">PC の予約はありません</div>`;
+      return;
     }
+
+    list.innerHTML = `
+      <table class="reserve-table">
+        <tr><th>予約日</th><th>枠</th><th>認証コード</th><th></th></tr>
+        ${myRes.map(r => `
+          <tr>
+            <td>${r.date}</td>
+            <td>${r.slot}</td>
+            <td>${r.code}</td>
+            <td>
+              <button class="cancel-btn"
+                data-equip="${r.slot}"
+                data-start="${r.date}"
+                data-code="${r.code}">
+                取り消し
+              </button>
+            </td>
+          </tr>
+        `).join("")}
+      </table>
+    `;
+
+    // ボタンクリック登録
+    document.querySelectorAll(".cancel-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        openMyCancelModal(
+          btn.dataset.equip,  // slot
+          btn.dataset.start,  // date
+          btn.dataset.code
+        );
+      });
+    });
+
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = "予約情報取得失敗…";
   }
+}
 
   const cancelCloseBtn = document.getElementById("cancelClose");
   if (cancelCloseBtn) {
